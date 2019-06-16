@@ -1,13 +1,49 @@
 body {
 	background: #fafafa;
 	font-family: cursive, sans-serif;
+	font-size: 12px;
 }
 
 button, .button {
 	border: 0;
-	padding: 8px 16px;
-	background: hsl(50, 75%, 75%);
+	cursor: pointer;
+	padding: 4px 12px;
+	background: hsl(100, 75%, 65%);
+	border: 4px solid hsl(100, 75%, 65%);
 	color: #fff;
 	text-decoration: none;
 	display: inline-block;
+	font-size: 14px;
+}
+button:active, .button:active, button:focus, .button:focus {
+	border: 4px solid hsl(100, 75%, 55%);
+}
+big {
+	font-weight: bold;
+	font-size: 14px;
+}
+main, form {
+	padding: 16px;
+	padding-top: 64px;
+	text-align: center;
+}
+
+input {
+	border: 0;
+	border-bottom: 2px solid hsl(0, 0%, 65%);
+	background: transparent;
+	padding: 8px;
+}
+
+input:invalid {
+	box-shadow: none;
+	border-bottom: 2px solid hsl(0, 75%, 65%)
+}
+
+input:focus {
+	border-bottom: 2px solid hsl(200, 75%, 65%);
+}
+
+.blue {
+	color: hsl(200, 75%, 65%);
 }
