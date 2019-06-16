@@ -1,0 +1,13 @@
+body {
+	background: #fafafa;
+	font-family: cursive, sans-serif;
+}
+
+button, .button {
+	border: 0;
+	padding: 8px 16px;
+	background: hsl(50, 75%, 75%);
+	color: #fff;
+	text-decoration: none;
+	display: inline-block;
+}

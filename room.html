@@ -1,0 +1,63 @@
+<html lang="en">
+	<head>
+		<title>countries.io - ffa</title>
+		<link rel="stylesheet" href="/style.css">
+		<style>
+#error:not(:empty) {
+	color: red;
+	background: inherit;
+	position: fixed;
+	top: 0; left: 0; width: 100%; height: 100%;
+}
+		</style>
+	</head>
+	<body>
+		<div id="error"></div>
+		<p><big id="country"></big> is you</p>
+		<p><span id="count">0</span> of <span id="max">0</span></p>
+		<a class="button" href="/">Cancel</a>
+		<script>
+var playercount = 0;
+var playermax = 0;
+
+function updatePlayerCount() {
+	document.getElementById("count").innerHTML = playercount;
+	document.getElementById("max").innerHTML = playermax;
+}
+
+var ws = new WebSocket("ws://" + location.host + "/ws/room");
+ws.onmessage = function(msg) {
+	console.log(msg.data);
+	if (typeof msg.data === "string") {
+		var command = msg.data.split(" ")[0];
+		if (command.startsWith("player")) {
+			updatePlayerCount();
+		}
+		if (command === "player_add") {
+			playercount += msg.data.split(" ")[1] | 0;
+			updatePlayerCount();
+		}
+		if (command === "player_remove") {
+			playercount--;
+			updatePlayerCount();
+		}
+		if (command === "player_max") {
+			playermax = msg.data.split(" ")[1] | 0;
+		}
+		if (command === "start") {
+			location.href = "/play#" + msg.data.split(" ")[1] + ":" + msg.data.split(" ")[2];
+		}
+		if (command === "error") {
+			console.error(msg.data.slice(6));
+			document.getElementById("error").innerHTML = msg.data.slice(6);
+		}
+	}
+}
+ws.onopen = function() {
+	ws.send("join " + location.pathname.slice(1) + " " + location.search.slice(9));
+	document.getElementById("country").innerHTML = location.search.slice(9);
+}
+		</script>
+	</body>
+</html>
+

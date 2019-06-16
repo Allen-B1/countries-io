@@ -1,0 +1,103 @@
+package main
+
+import (
+	"github.com/gorilla/websocket"
+	"log"
+	"math/rand"
+	"fmt"
+	"strconv"
+)
+
+var rooms = make(map[string]*Room)
+
+// Returns the room. If not found creates one
+func roomsGet(id string) *Room {
+	room, ok := rooms[id]
+	if !ok {
+		room = NewRoom(6)
+		rooms[id] = room
+	}
+
+	return room
+}
+
+type roomConnInfo struct {
+	Room string
+	Country string
+}
+
+var roomConns = make(map[*websocket.Conn]roomConnInfo)
+
+func broadcastRoom(roomId string, message string) {
+	for conn, info := range roomConns {
+		if roomId == info.Room {
+			conn.WriteMessage(websocket.TextMessage, []byte(message))
+		}
+	}
+}
+
+func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
+	if mt == websocket.CloseMessage {
+		info, ok := roomConns[conn]
+		if !ok {
+			return
+		}
+		roomId := info.Room
+		country := info.Country
+		room := rooms[roomId]
+		if room != nil {
+			room.Remove(country)
+			delete(roomConns, conn)
+			broadcastRoom(roomId, "player_remove")
+
+			log.Println("leave " + roomId + " " + country)
+		}
+		return
+	}
+	if mt == websocket.TextMessage && len(args) >= 3 && args[0] == "join" {
+		if _, ok := roomConns[conn]; ok {
+			conn.WriteMessage(websocket.TextMessage, []byte("error join error: already in a game"))
+			return
+		}
+
+		roomId := args[1]
+		room := roomsGet(roomId)
+		if !room.Add(args[2]) {
+			conn.WriteMessage(websocket.TextMessage, []byte("error join error: that country already exists"))
+			return
+		}
+
+		roomConns[conn] = roomConnInfo {
+			Room: args[1],
+			Country: args[2],
+		}
+		if len(room.Countries) - 1 > 0 {
+			conn.WriteMessage(websocket.TextMessage, []byte("player_add " + fmt.Sprint(len(room.Countries) - 1)))
+		}
+		conn.WriteMessage(websocket.TextMessage, []byte("player_max " + fmt.Sprint(room.Max)))
+		broadcastRoom(args[1], "player_add 1")
+
+		if len(room.Countries) == room.Max {
+			game := room.Game()
+			// broadcast start
+			gameId := strconv.FormatInt(rand.Int63(), 36)
+			games[gameId] = game
+
+			for conn, info := range roomConns {
+				if roomId == info.Room {
+					index := -1
+					for i, country := range game.Countries {
+						if country == info.Country {
+							index = i
+						}
+					}
+					conn.WriteMessage(websocket.TextMessage, []byte("start " + gameId + " " + fmt.Sprint(index)))
+				}
+			}
+		}
+
+		log.Println("join " + args[1] + " " + args[2])
+		return
+ 	}
+}
+

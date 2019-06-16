@@ -1,0 +1,29 @@
+<html lang="en">
+	<head>
+		<title>countries.io - ffa</title>
+		<link rel="stylesheet" href="/style.css">
+		<style>
+#error:not(:empty) {
+	color: red;
+	background: inherit;
+	position: fixed;
+	top: 0; left: 0; width: 100%; height: 100%;
+}
+		</style>
+	</head>
+	<body>
+		<script>
+
+var ws = new WebSocket("ws://" + location.host + "/ws/game");
+ws.onmessage = function(msg) {
+	console.log(msg.data);
+}
+ws.onopen = function() {
+	var arr = location.hash.slice(1).split(":");
+	var id = arr[0], index = arr[1];
+	ws.send("join " + id + " " + index)
+}
+		</script>
+	</body>
+</html>
+

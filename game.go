@@ -2,8 +2,6 @@ package main
 
 // Type Game represents a game
 type Game struct {
-//	Connections []*websocket.Connection // conn = [countryId] ???
-
 	// The names of the countries
 	Countries []string // name = [countryId]
 
