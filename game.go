@@ -23,6 +23,7 @@ type Game struct {
 	Armies   []uint       // army = [tileIndex]
 	Cities   map[int]bool // isCity = [tileIndex]
 	Capitals map[int]bool // isCaptial = [tileIndex]
+	Walls    map[int]bool // isWall = [tileIndex]
 
 	// The current turn #
 	Turn int
@@ -37,6 +38,7 @@ func NewGame(countries []string, width int, height int) *Game {
 		Armies:    make([]uint, size),
 		Cities:    make(map[int]bool),
 		Capitals:  make(map[int]bool),
+		Walls:     make(map[int]bool),
 		Turn:      0,
 		Width:     width,
 		Height:    height,
@@ -101,7 +103,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 
 // Method MakeCity creates a city
 func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
-	if g.Armies[tileIndex] < 31 {
+	if g.Terrain[tileIndex] != countryIndex || g.Armies[tileIndex] < 31 {
 		return false
 	}
 	g.Armies[tileIndex] -= 30
@@ -111,23 +113,38 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 	return true
 }
 
+func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
+	if g.Terrain[tileIndex] != countryIndex {
+		return false
+	}
+	g.Walls[tileIndex] = true
+	g.Armies[tileIndex] *= 2
+	return true
+}
+
 // Method MarshalJSON implements the json.Marshaler interface
 func (g *Game) MarshalJSON() ([]byte, error) {
 	citylist := make([]int, 0, len(g.Cities))
 	capitallist := make([]int, 0, len(g.Capitals))
+	walllist := make([]int, 0, len(g.Capitals))
 	for city, _ := range g.Cities {
 		citylist = append(citylist, city)
 	}
 	for capital, _ := range g.Capitals {
 		capitallist = append(capitallist, capital)
 	}
+	for wall, _ := range g.Walls {
+		walllist = append(walllist, wall)
+	}
 	sort.Ints(citylist)
 	sort.Ints(capitallist)
+	sort.Ints(walllist)
 
 	return json.Marshal(map[string]interface{}{
 		"terrain":  g.Terrain,
 		"armies":   g.Armies,
 		"cities":   citylist,
 		"capitals": capitallist,
+		"walls":    walllist,
 	})
 }

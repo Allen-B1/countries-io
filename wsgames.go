@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 var games = make(map[string]*Game)
@@ -87,7 +88,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			log.Println("Error: ", err1, " or ", err2)
 		}
 		game.Attack(info.Index, fromTile, toTile)
-	case "city":
+	case "city", "wall":
 		if len(args) != 2 {
 			return
 		}
@@ -95,7 +96,11 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		if err != nil {
 			log.Println(err)
 		}
-		game.MakeCity(info.Index, tile)
+		if args[0] == "city" {
+			game.MakeCity(info.Index, tile)
+		} else if args[0] == "wall" {
+			game.MakeWall(info.Index, tile)
+		}
 	}
 }
 

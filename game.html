@@ -71,7 +71,7 @@ var map = null;
 var countries = [];
 var width, height;
 
-var ws = new WebSocket("ws://" + location.host + "/ws/game");
+var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/game");
 ws.onmessage = function(msg) {
 	if (msg.data.startsWith("update ")) {
 		var data = JSON.parse(msg.data.slice("update ".length));
@@ -128,28 +128,36 @@ ws.onopen = function() {
 }
 
 window.onkeydown = function(e) {
-	if (document.activeElement.id && document.activeElement.id.startsWith("tile-") && e.code.startsWith("Arrow")) {
+	if (document.activeElement.id && document.activeElement.id.startsWith("tile-")){
 		var index = document.activeElement.id.slice(5) | 0;
-		var endIndex;
-		switch (e.code) {
-		case "ArrowLeft":
-			endIndex = index - 1;
-			break;
-		case "ArrowRight":
-			endIndex = index + 1;
-			break;
-		case "ArrowUp":
-			endIndex = index - width;
-			break;
-		case "ArrowDown":
-			endIndex = index + width;
-			break;
-		default: return;
-		}
-		ws.send("attack " + index + " " + endIndex);
-		var endtile = document.getElementById("tile-" + endIndex);
-		if (endtile != null) endtile.focus();
-	}
+        if (e.code.startsWith("Arrow")) {
+            var endIndex;
+            switch (e.code) {
+            case "ArrowLeft":
+                endIndex = index - 1;
+                break;
+            case "ArrowRight":
+                endIndex = index + 1;
+                break;
+            case "ArrowUp":
+                endIndex = index - width;
+                break;
+            case "ArrowDown":
+                endIndex = index + width;
+                break;
+            default: return;
+            }
+            ws.send("attack " + index + " " + endIndex);
+            var endtile = document.getElementById("tile-" + endIndex);
+            if (endtile != null) endtile.focus();
+    	}
+        if (e.key == "1") {
+            ws.send("city " + index);
+        }
+        if (e.key == "2") {
+            ws.send("wall " + index);
+        }
+    }
 }
 		</script>
 	</body>

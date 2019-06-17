@@ -30,7 +30,7 @@ function updatePlayerCount() {
 	document.getElementById("max").innerHTML = playermax;
 }
 
-var ws = new WebSocket("ws://" + location.host + "/ws/room");
+var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/room");
 ws.onmessage = function(msg) {
 	console.log(msg.data);
 	if (typeof msg.data === "string") {
