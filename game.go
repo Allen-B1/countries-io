@@ -81,7 +81,11 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 	// TODO: Make legit
 	// * Check if tiles are next to each other
 	// * Compare army sizes
-	if g.Terrain[fromTileIndex] != countryIndex || g.Armies[fromTileIndex] < 2 {
+	// * Capturing cities/capitals = gaining 3x3/5x5 square
+	// * Capture capitals => cities
+	if g.Terrain[fromTileIndex] != countryIndex ||
+		g.Armies[fromTileIndex] < 2 ||
+		toTileIndex >= len(g.Terrain) || toTileIndex < 0 {
 		return false
 	}
 

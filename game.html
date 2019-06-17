@@ -113,6 +113,9 @@ ws.onmessage = function(msg) {
 			cellname.innerHTML = countries[i];
 			cellname.classList.add("country");
 			cellname.setAttribute("data-index", i);
+			if (String(i) == location.hash.slice(1).split(":")[1]) {
+				row.style.fontWeight = "bold";
+			}
 		}
 	} else {
 		console.log(msg.data);
