@@ -107,7 +107,7 @@ ws.onmessage = function(msg) {
             elem.classList.add("city");
         }
         if (!(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
-            document.getElementById("tile-" + map.generals[location.hash.slice(1).split(":")[1]]).focus();
+            document.getElementById("tile-" + map.capitals[location.hash.slice(1).split(":")[1]]).focus();
         }
 		console.log("update");
 	} else if (msg.data.startsWith("map ")) {
