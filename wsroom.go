@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"strconv"
+	"time"
 )
 
 var rooms = make(map[string]*Room)
@@ -16,6 +17,7 @@ func roomsGet(id string) *Room {
 	if !ok {
 		room = NewRoom(6)
 		rooms[id] = room
+		go roomThread(id, room)
 	}
 
 	return room
@@ -71,34 +73,52 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 			Room:    args[1],
 			Country: args[2],
 		}
+		conn.WriteMessage(websocket.TextMessage, []byte("player_max "+fmt.Sprint(room.Max)))
 		if len(room.Countries)-1 > 0 {
 			conn.WriteMessage(websocket.TextMessage, []byte("player_add "+fmt.Sprint(len(room.Countries)-1)))
 		}
-		conn.WriteMessage(websocket.TextMessage, []byte("player_max "+fmt.Sprint(room.Max)))
 		broadcastRoom(args[1], "player_add 1")
+		if room.StartTime != nil {
+			broadcastRoom(args[1], "time " + fmt.Sprint(room.StartTime.Unix() * 1000))
+		} else {
+			broadcastRoom(args[1], "time_reset")
+		}
 
 		if len(room.Countries) == room.Max {
-			game := room.Game()
-			// broadcast start
-			gameId := strconv.FormatInt(rand.Int63(), 36)
-			games[gameId] = game
-
-			for conn, info := range roomConns {
-				if roomId == info.Room {
-					index := -1
-					for i, country := range game.Countries {
-						if country == info.Country {
-							index = i
-						}
-					}
-					conn.WriteMessage(websocket.TextMessage, []byte("start "+gameId+" "+fmt.Sprint(index)))
-				}
-			}
-
-			go gameThread(gameId, game)
+			startGame(roomId, room)
 		}
 
 		log.Println("join " + args[1] + " " + args[2])
 		return
 	}
 }
+
+func roomThread(roomId string, room *Room) {
+	for {
+		time.Sleep(1 * time.Second)
+		if room.StartTime != nil && time.Now().After(*room.StartTime) {
+			startGame(roomId, room)
+		}
+	}
+}
+func startGame(roomId string, room *Room) {
+	game := room.Game()
+	// broadcast start
+	gameId := strconv.FormatInt(rand.Int63(), 36)
+	games[gameId] = game
+
+	for conn, info := range roomConns {
+		if roomId == info.Room {
+			index := -1
+			for i, country := range game.Countries {
+				if country == info.Country {
+					index = i
+				}
+			}
+			conn.WriteMessage(websocket.TextMessage, []byte("start "+gameId+" "+fmt.Sprint(index)))
+		}
+	}
+
+	go gameThread(gameId, game)
+}
+
