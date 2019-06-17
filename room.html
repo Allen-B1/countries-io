@@ -3,21 +3,28 @@
 		<title>countries.io - ffa</title>
 		<link rel="stylesheet" href="/style.css">
 		<style>
-#error:not(:empty) {
-	color: red;
+#error-container {
 	background: inherit;
 	position: fixed;
 	top: 0; left: 0; width: 100%; height: 100%;
 	text-align: center;
 	padding-top: 64px;
 	font-size: 16px;
+
+	display:none;
+}
+#error {
+	color: red;
 }
 		</style>
 	</head>
 	<body>
-		<div id="error"></div>
+		<div id="error-container">
+			<div id="error" style="margin-bottom:8px"></div>
+			<a class="button" href="/">Back</a>
+		</div>
 		<main>
-			<p><big id="country" class="blue"></big> is you</p>
+			<p><big id="country"></big> is you</p>
 			<p style="font-size:16px"><span id="count">0</span> of <span id="max">0</span></p>
 			<p id="time_container"><span id="time"></span> left</p>
 			<a class="button" href="/">Cancel</a>
@@ -82,6 +89,7 @@ ws.onmessage = function(msg) {
 		if (command === "error") {
 			console.error(msg.data.slice(6));
 			document.getElementById("error").innerHTML = msg.data.slice(6);
+			document.getElementById("error-container").style.display = "block";
 		}
 	}
 }
