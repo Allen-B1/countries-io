@@ -9,6 +9,30 @@
 	position: fixed;
 	top: 0; left: 0; width: 100%; height: 100%;
 }
+.tile {
+	width: 35px;
+	height:35px;
+	color: #fff;
+	text-align: center;
+}
+#map {
+	border-collapse: collapse;
+	background: #eaeaea;
+}
+.tile[data-terrain="-1"] {
+	color: #111; }
+.tile[data-terrain="0"] {
+	background: hsl(0, 75%, 65%); }
+.tile[data-terrain="1"] {
+	background: hsl(200, 75%, 65%); }
+.tile[data-terrain="2"] {
+	background: hsl(100, 75%, 65%); }
+.tile[data-terrain="3"] {
+	background: hsl(35, 75%, 65%); }
+.tile[data-terrain="4"] {
+	background: hsl(70, 75%, 65%); }
+.tile[data-terrain="5"] {
+	background: hsl(300, 75%, 65%); }
 		</style>
 	</head>
 	<body>
@@ -24,6 +48,16 @@ ws.onmessage = function(msg) {
 	if (msg.data.startsWith("update ")) {
 		var data = JSON.parse(msg.data.slice("update ".length));
 		map = data;
+
+		for (var i = 0; i < map.terrain.length; i++) {
+			var elem = document.getElementById("tile-" + i);
+			if (elem != null) {
+				elem.setAttribute("data-terrain", map.terrain[i]);
+				if (map.terrain[i] >= 0) {
+					elem.innerHTML = map.armies[i];
+				}
+			}
+		}
 		console.log("update");
 	} else if (msg.data.startsWith("map ")) {
 		console.log(msg.data);
@@ -34,7 +68,8 @@ ws.onmessage = function(msg) {
 			let row = maptable.insertRow(i);
 			for (let j = 0; j < width; j++) {
 				let cell = row.insertCell(j);
-				cell.id = "cell-" + (i * width + j);
+				cell.id = "tile-" + (i * width + j);
+				cell.classList.add("tile");
 			}
 		}
 	} else {
