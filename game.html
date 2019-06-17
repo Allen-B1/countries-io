@@ -15,9 +15,19 @@
 	color: #fff;
 	text-align: center;
 }
+#map, #countries {
+	border-collapse: collapse; }
 #map {
-	border-collapse: collapse;
-	background: #eaeaea;
+	background: #ddd; }
+#countries {
+	position: fixed;
+	top: 16px; right: 16px;
+}
+body {
+	margin: 0; padding: 16px;
+}
+#countries td {
+	padding: 4px 12px;
 }
 .tile[data-terrain="-1"] {
 	color: #111; }
@@ -33,15 +43,28 @@
 	background: hsl(70, 75%, 65%); }
 .tile[data-terrain="5"] {
 	background: hsl(300, 75%, 65%); }
+
+.country[data-index="0"] {
+	color: hsl(0, 75%, 55%); }
+.country[data-index="1"] {
+	color: hsl(200, 75%, 55%); }
+.country[data-index="2"] {
+	color: hsl(100, 75%, 55%); }
+.country[data-index="3"] {
+	color: hsl(35, 75%, 55%); }
+.country[data-index="4"] {
+	color: hsl(70, 75%, 55%); }
+.country[data-index="5"] {
+	color: hsl(300, 75%, 55%); }
 		</style>
 	</head>
 	<body>
 		<div id="error"></div>
-		<table id="map">
-
-		</table>
+		<table id="countries"></table>
+		<table id="map"></table>
 		<script>
 var map = null;
+var countries = [];
 
 var ws = new WebSocket("ws://" + location.host + "/ws/game");
 ws.onmessage = function(msg) {
@@ -71,6 +94,17 @@ ws.onmessage = function(msg) {
 				cell.id = "tile-" + (i * width + j);
 				cell.classList.add("tile");
 			}
+		}
+	} else if (msg.data.startsWith("player_list ")) {
+		console.log(msg.data);
+		countries = msg.data.split(" ").slice(1);
+		var table = document.getElementById("countries");
+		for (let i = 0; i < countries.length; i++) {
+			let row = table.insertRow(i);
+			let cellname = row.insertCell(0);
+			cellname.innerHTML = countries[i];
+			cellname.classList.add("country");
+			cellname.setAttribute("data-index", i);
 		}
 	} else {
 		console.log(msg.data);
