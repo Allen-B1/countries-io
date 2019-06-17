@@ -89,6 +89,14 @@ ws.onmessage = function(msg) {
 				}
 			}
 		}
+        for (var tile of map.capitals) {
+			var elem = document.getElementById("tile-" + tile);
+            elem.classList.add("capital");
+        }
+        for (var tile of map.cities) {
+			var elem = document.getElementById("tile-" + tile);
+            elem.classList.add("city");
+        }
 		console.log("update");
 	} else if (msg.data.startsWith("map ")) {
 		console.log(msg.data);

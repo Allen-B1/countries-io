@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"math/rand"
 	"sort"
 )
@@ -118,7 +117,6 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 		return false
 	}
 	g.Armies[tileIndex] = g.Armies[tileIndex] * 2
-	log.Println(g.Armies[tileIndex])
 	g.Terrain[tileIndex] = TILE_WALL
 	return true
 }

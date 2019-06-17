@@ -100,6 +100,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			game.MakeCity(info.Index, tile)
 		} else if args[0] == "wall" {
 			game.MakeWall(info.Index, tile)
+			log.Println(game.Armies[tile]) // TODO: This is not working
 		}
 	}
 }
