@@ -147,7 +147,7 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	g.Armies[tileIndex] *= 3
+	g.Armies[tileIndex] *= 5
 	g.Terrain[tileIndex] = TILE_WALL
 	return true
 }
@@ -207,6 +207,9 @@ func (g *Game) TilesAround(tile int, r int) []int {
 func (g *Game) ConvertAround(tile int, r int, countryIndex int) {
 	for _, tileAround := range g.TilesAround(tile, r) {
 		if g.Cities[tileAround] || g.Capitals[tileAround] {
+			continue
+		}
+		if g.Terrain[tileAround] == TILE_WALL { // Don't convert walls
 			continue
 		}
 		g.Terrain[tileAround] = countryIndex
