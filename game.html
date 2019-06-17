@@ -82,6 +82,7 @@ body {
 var map = null;
 var countries = [];
 var width, height;
+var gameId, countryIndex;
 
 var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/game");
 ws.onmessage = function(msg) {
@@ -107,8 +108,13 @@ ws.onmessage = function(msg) {
             elem.classList.add("city");
         }
         if (!(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
-            document.getElementById("tile-" + map.capitals[location.hash.slice(1).split(":")[1]]).focus();
-        }
+			for (var capital of map.capitals) {
+				if (map.terrain[capital] == countryIndex) {
+		            document.getElementById("tile-" + capital).focus();
+					break;
+				}
+			}
+       }
 		console.log("update");
 	} else if (msg.data.startsWith("map ")) {
 		console.log(msg.data);
@@ -136,7 +142,7 @@ ws.onmessage = function(msg) {
 			cellname.innerHTML = countries[i];
 			cellname.classList.add("country");
 			cellname.setAttribute("data-index", i);
-			if (String(i) == location.hash.slice(1).split(":")[1]) {
+			if (i == countryIndex) {
 				row.style.fontWeight = "bold";
 			}
 		}
@@ -146,8 +152,8 @@ ws.onmessage = function(msg) {
 }
 ws.onopen = function() {
 	var arr = location.hash.slice(1).split(":");
-	var id = arr[0], index = arr[1];
-	ws.send("join " + id + " " + index)
+	gameId = arr[0], countryIndex = arr[1] | 0;
+	ws.send("join " + gameId + " " + countryIndex);
 }
 
 window.onkeydown = function(e) {

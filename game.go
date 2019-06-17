@@ -56,12 +56,7 @@ func NewGame(countries []string, width int, height int) *Game {
 			}
 			g.Terrain[index] = countryIndex
 			g.Capitals[index] = true
-			for _, tileAround := range g.TilesAround(index, true) {
-				g.Terrain[tileAround] = countryIndex
-				if g.Armies[tileAround] == 0 {
-					g.Armies[tileAround] = 1
-				}
-			}
+			g.ConvertAround(index, true, countryIndex)
 
 			break
 			// TODO: 5x5 square around capital
@@ -104,21 +99,11 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 			g.Terrain[toTileIndex] = countryIndex
 
 			if g.Cities[toTileIndex] {
-				for _, tileAround := range g.TilesAround(toTileIndex, false) {
-					g.Terrain[tileAround] = countryIndex
-					if g.Armies[tileAround] == 0 {
-						g.Armies[tileAround] = 1
-					}
-				}
+				g.ConvertAround(toTileIndex, false, countryIndex)
 			}
 
 			if g.Capitals[toTileIndex] {
-				for _, tileAround := range g.TilesAround(toTileIndex, true) {
-					g.Terrain[tileAround] = countryIndex
-					if g.Armies[tileAround] == 0 {
-						g.Armies[tileAround] = 1
-					}
-				}
+				g.ConvertAround(toTileIndex, true, countryIndex)
 
 				delete(g.Capitals, toTileIndex)
 				g.Cities[toTileIndex] = true
@@ -139,16 +124,15 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex || g.Armies[tileIndex] < 31 || g.Cities[tileIndex] {
 		return false
 	}
-	g.Armies[tileIndex] -= 30
-	g.Cities[tileIndex] = true
-
-	for _, tileAround := range g.TilesAround(tileIndex, false) {
-		g.Terrain[tileAround] = countryIndex
-		if g.Armies[tileAround] == 0 {
-			g.Armies[tileAround] = 1
+	for _, tile := range g.TilesAround(tileIndex, true) {
+		if g.Cities[tile] || g.Capitals[tile] {
+			return false // Can't make a city too close to a city/capital
 		}
 	}
-	// TODO: +1 army in 3x3 square around city
+
+	g.Armies[tileIndex] -= 30
+	g.Cities[tileIndex] = true
+	g.ConvertAround(tileIndex, false, countryIndex)
 	return true
 }
 
@@ -218,4 +202,16 @@ func (g *Game) TilesAround(tile int, big bool) []int {
 	}
 
 	return out
+}
+
+func (g *Game) ConvertAround(tile int, big bool, countryIndex int) {
+	for _, tileAround := range g.TilesAround(tile, big) {
+		if g.Cities[tileAround] || g.Capitals[tileAround] {
+			continue
+		}
+		g.Terrain[tileAround] = countryIndex
+		if g.Armies[tileAround] == 0 {
+			g.Armies[tileAround] = 1
+		}
+	}
 }
