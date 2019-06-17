@@ -53,7 +53,7 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 			broadcastRoom(roomId, "player_remove")
 
 			log.Println("leave " + roomId + " " + country)
-			if room.StartTime == nil{
+			if room.StartTime == nil {
 				broadcastRoom(roomId, "time_reset")
 			}
 		}
@@ -82,7 +82,7 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 		}
 		broadcastRoom(args[1], "player_add 1")
 		if room.StartTime != nil {
-			broadcastRoom(args[1], "time " + fmt.Sprint(room.StartTime.Unix() * 1000))
+			broadcastRoom(args[1], "time "+fmt.Sprint(room.StartTime.Unix()*1000))
 		} else {
 			broadcastRoom(args[1], "time_reset")
 		}
@@ -124,4 +124,3 @@ func startGame(roomId string, room *Room) {
 
 	go gameThread(gameId, game)
 }
-

@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"math/rand"
 	"sort"
-	"log"
 )
 
 const (
@@ -50,7 +50,8 @@ func NewGame(countries []string, width int, height int) *Game {
 	}
 
 	for countryIndex, _ := range g.Countries {
-		makecapital: for {
+	makecapital:
+		for {
 			index := rand.Intn(size)
 			if _, ok := g.Capitals[index]; ok {
 				continue
@@ -75,13 +76,29 @@ func NewGame(countries []string, width int, height int) *Game {
 
 // Method NextTurn
 func (g *Game) NextTurn() {
-	if g.Turn%2 == 0 {
-		for cityIndex, _ := range g.Cities {
-			g.Armies[cityIndex] += 1
+	for index, _ := range g.Terrain {
+		switch g.TileType(index) {
+		case TILE_WALL:
+			continue
+		case TILE_EMPTY:
+			continue
+		case TILE_RURAL:
+			if g.Turn%50 == 0 {
+				g.Armies[index] += 1
+			}
+			continue
+		case TILE_SUBURB:
+			if g.Turn%20 == 0 {
+				g.Armies[index] += 1
+			}
+		case TILE_URBAN:
+			if g.Turn%2 == 0 && g.Cities[index] {
+				g.Armies[index] += 1
+			}
+			if g.Capitals[index] {
+				g.Armies[index] += 1
+			}
 		}
-	}
-	for capitalIndex, _ := range g.Capitals {
-		g.Armies[capitalIndex] += 1
 	}
 	g.Turn++
 }
@@ -185,19 +202,19 @@ func (g *Game) TilesAround(tile int, r int) []int {
 	if startCol < 0 {
 		startCol = 0
 	}
-	if endCol > g.Width - 1 {
+	if endCol > g.Width-1 {
 		endCol = g.Width - 1
 	}
 	if startRow < 0 {
 		startRow = 0
 	}
-	if endRow > g.Height - 1 {
+	if endRow > g.Height-1 {
 		endRow = g.Height - 1
 	}
 
 	for row := startRow; row <= endRow; row++ {
 		for col := startCol; col <= endCol; col++ {
-			out = append(out, row * g.Width + col)
+			out = append(out, row*g.Width+col)
 		}
 	}
 
@@ -217,4 +234,38 @@ func (g *Game) ConvertAround(tile int, r int, countryIndex int) {
 			g.Armies[tileAround] = 1
 		}
 	}
+}
+
+const (
+	TILE_RURAL  = 0
+	TILE_SUBURB = 1
+	TILE_URBAN  = 2
+)
+
+func (g *Game) TileType(tile int) int {
+	if g.Terrain[tile] < 0 {
+		return g.Terrain[tile]
+	}
+	if g.Capitals[tile] || g.Cities[tile] {
+		return TILE_URBAN
+	}
+	for capital, _ := range g.Capitals {
+		if g.Terrain[capital] == g.Terrain[tile] {
+			for _, tileAround := range g.TilesAround(capital, 2) {
+				if tileAround == tile {
+					return TILE_SUBURB
+				}
+			}
+		}
+	}
+	for city, _ := range g.Cities {
+		if g.Terrain[city] == g.Terrain[tile] {
+			for _, tileAround := range g.TilesAround(city, 1) {
+				if tileAround == tile {
+					return TILE_SUBURB
+				}
+			}
+		}
+	}
+	return TILE_RURAL
 }
