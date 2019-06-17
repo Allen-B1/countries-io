@@ -83,12 +83,12 @@ func (g *Game) NextTurn() {
 		case TILE_EMPTY:
 			continue
 		case TILE_RURAL:
-			if g.Turn%50 == 0 {
+			if g.Turn%50 == 0 && g.Turn != 0 {
 				g.Armies[index] += 1
 			}
 			continue
 		case TILE_SUBURB:
-			if g.Turn%20 == 0 {
+			if g.Turn%20 == 0 && g.Turn != 0 {
 				g.Armies[index] += 1
 			}
 		case TILE_URBAN:
