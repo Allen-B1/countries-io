@@ -53,6 +53,9 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 			broadcastRoom(roomId, "player_remove")
 
 			log.Println("leave " + roomId + " " + country)
+			if room.StartTime == nil{
+				broadcastRoom(roomId, "time_reset")
+			}
 		}
 		return
 	}
