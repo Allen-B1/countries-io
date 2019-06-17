@@ -94,7 +94,7 @@ ws.onmessage = function(msg) {
 			var elem = document.getElementById("tile-" + i);
 			if (elem != null) {
 				elem.setAttribute("data-terrain", map.terrain[i]);
-				if (map.terrain[i] >= 0) {
+				if (map.terrain[i] >= 0 || map.armies[i] > 0) {
 					elem.innerHTML = map.armies[i];
 				}
 			}
@@ -161,19 +161,19 @@ ws.onopen = function() {
 window.onkeydown = function(e) {
 	if (document.activeElement.id && document.activeElement.id.startsWith("tile-")){
 		var index = document.activeElement.id.slice(5) | 0;
-        if (e.code.startsWith("Arrow")) {
+        if (e.code == "KeyW" || e.code == "KeyA" || e.code == "KeyS" || e.code == "KeyD") {
             var endIndex;
             switch (e.code) {
-            case "ArrowLeft":
+            case "KeyA":
                 endIndex = index - 1;
                 break;
-            case "ArrowRight":
+            case "KeyD":
                 endIndex = index + 1;
                 break;
-            case "ArrowUp":
+            case "KeyW":
                 endIndex = index - width;
                 break;
-            case "ArrowDown":
+            case "KeyS":
                 endIndex = index + width;
                 break;
             default: return;

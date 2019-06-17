@@ -147,7 +147,7 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	g.Armies[tileIndex] = g.Armies[tileIndex] * 2
+	g.Armies[tileIndex] *= 3
 	g.Terrain[tileIndex] = TILE_WALL
 	return true
 }
