@@ -1,19 +1,19 @@
 package main
 
 import (
-	"strconv"
-	"github.com/gorilla/websocket"
-	"time"
-	"strings"
-	"log"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/websocket"
+	"log"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var games = make(map[string]*Game)
 
 type gameConnInfo struct {
-	Game string
+	Game  string
 	Index int
 }
 
@@ -33,7 +33,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		if !ok {
 			return
 		}
-		broadcastGame(info.Game, "player_leave " + fmt.Sprint(info.Index))
+		broadcastGame(info.Game, "player_leave "+fmt.Sprint(info.Index))
 		return
 	}
 	if len(args) == 0 {
@@ -56,13 +56,13 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 
 		index, err := strconv.Atoi(args[2])
 		if err != nil {
-			conn.WriteMessage(websocket.TextMessage, []byte("error " + err.Error()))
+			conn.WriteMessage(websocket.TextMessage, []byte("error "+err.Error()))
 			return
 		}
 		gameConns[conn] = gameConnInfo{Game: gameId, Index: index}
 		game := games[gameId]
 
-		conn.WriteMessage(websocket.TextMessage, []byte("player_list " + strings.Join(game.Countries, " ")))
+		conn.WriteMessage(websocket.TextMessage, []byte("player_list "+strings.Join(game.Countries, " ")))
 		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("map %d %d", game.Width, game.Height)))
 		return
 	}
@@ -111,7 +111,7 @@ func gameThread(gameId string, game *Game) {
 			log.Println(err)
 			continue
 		}
-		broadcastGame(gameId, "update " + string(data))
+		broadcastGame(gameId, "update "+string(data))
 		time.Sleep(dur)
 		game.NextTurn()
 	}

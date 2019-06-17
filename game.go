@@ -16,7 +16,7 @@ type Game struct {
 	// The names of the countries
 	Countries []string // name = [countryId]
 
-	Width int
+	Width  int
 	Height int
 
 	Terrain  []int        // countryId = [tileIndex]
@@ -38,8 +38,8 @@ func NewGame(countries []string, width int, height int) *Game {
 		Cities:    make(map[int]bool),
 		Capitals:  make(map[int]bool),
 		Turn:      0,
-		Width: width,
-		Height: height,
+		Width:     width,
+		Height:    height,
 	}
 
 	// Reset to -1
@@ -79,9 +79,19 @@ func (g *Game) NextTurn() {
 // Method Attack causes a country to move armies
 func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool {
 	// TODO: Make legit
-	g.Terrain[toTileIndex] = countryIndex
-	g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1
+	// * Check if tiles are next to each other
+	// * Compare army sizes
+	if g.Terrain[fromTileIndex] != countryIndex || g.Armies[fromTileIndex] < 2 {
+		return false
+	}
+
+	if g.Terrain[toTileIndex] == countryIndex {
+		g.Armies[toTileIndex] += g.Armies[fromTileIndex] - 1
+	} else {
+		g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1
+	}
 	g.Armies[fromTileIndex] = 1
+	g.Terrain[toTileIndex] = countryIndex
 	return true
 }
 
