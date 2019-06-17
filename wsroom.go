@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"math/rand"
-	"fmt"
 	"strconv"
 )
 
@@ -22,7 +22,7 @@ func roomsGet(id string) *Room {
 }
 
 type roomConnInfo struct {
-	Room string
+	Room    string
 	Country string
 }
 
@@ -67,14 +67,14 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 			return
 		}
 
-		roomConns[conn] = roomConnInfo {
-			Room: args[1],
+		roomConns[conn] = roomConnInfo{
+			Room:    args[1],
 			Country: args[2],
 		}
-		if len(room.Countries) - 1 > 0 {
-			conn.WriteMessage(websocket.TextMessage, []byte("player_add " + fmt.Sprint(len(room.Countries) - 1)))
+		if len(room.Countries)-1 > 0 {
+			conn.WriteMessage(websocket.TextMessage, []byte("player_add "+fmt.Sprint(len(room.Countries)-1)))
 		}
-		conn.WriteMessage(websocket.TextMessage, []byte("player_max " + fmt.Sprint(room.Max)))
+		conn.WriteMessage(websocket.TextMessage, []byte("player_max "+fmt.Sprint(room.Max)))
 		broadcastRoom(args[1], "player_add 1")
 
 		if len(room.Countries) == room.Max {
@@ -91,13 +91,14 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 							index = i
 						}
 					}
-					conn.WriteMessage(websocket.TextMessage, []byte("start " + gameId + " " + fmt.Sprint(index)))
+					conn.WriteMessage(websocket.TextMessage, []byte("start "+gameId+" "+fmt.Sprint(index)))
 				}
 			}
+
+			go gameThread(gameId, game)
 		}
 
 		log.Println("join " + args[1] + " " + args[2])
 		return
- 	}
+	}
 }
-

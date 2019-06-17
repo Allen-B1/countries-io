@@ -9,7 +9,7 @@ type Room struct {
 
 func NewRoom(max int) *Room {
 	r := &Room{
-		Max: max,
+		Max:       max,
 		Countries: make(map[string]bool),
 	}
 
@@ -42,4 +42,3 @@ func (r *Room) Game() *Game {
 	game := NewGame(countrylist, 20, 20)
 	return game
 }
-
