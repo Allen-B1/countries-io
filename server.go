@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/gorilla/websocket"
 	"log"
 	"math/rand"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -19,6 +20,12 @@ func main() {
 
 	http.HandleFunc("/style.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "style.css")
+	})
+	http.HandleFunc("/city.svg", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "city.svg")
+	})
+	http.HandleFunc("/capital.svg", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "capital.svg")
 	})
 
 	http.HandleFunc("/ws/room", func(w http.ResponseWriter, r *http.Request) {

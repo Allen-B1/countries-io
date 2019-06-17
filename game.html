@@ -10,8 +10,8 @@
 	top: 0; left: 0; width: 100%; height: 100%;
 }
 .tile {
-	width: 35px;
-	height:35px;
+	width: 32px;
+	height:32px;
 	color: #fff;
 	text-align: center;
 }
@@ -29,26 +29,35 @@ body {
 #countries td {
 	padding: 4px 12px;
 }
+.tile {
+    background: var(--color); }
 .tile[data-terrain="-2"] {
 	background: #888;
     color: #fff; }
 .tile[data-terrain="-1"] {
+    background: transparent;
 	color: #111; }
 .tile[data-terrain="0"] {
-	background: hsl(0, 75%, 65%); }
+    --color: hsl(0, 75%, 65%); }
 .tile[data-terrain="1"] {
-	background: hsl(200, 75%, 65%); }
+    --color: hsl(200, 75%, 65%); }
 .tile[data-terrain="2"] {
-	background: hsl(100, 75%, 65%); }
+    --color: hsl(100, 75%, 65%); }
 .tile[data-terrain="3"] {
-	background: hsl(35, 75%, 65%); }
+    --color: hsl(35, 75%, 65%); }
 .tile[data-terrain="4"] {
-	background: hsl(70, 75%, 65%); }
+    --color: hsl(70, 75%, 65%); }
 .tile[data-terrain="5"] {
-	background: hsl(300, 75%, 65%); }
+    --color: hsl(300, 75%, 65%); }
 .tile:focus {
 	border: 2px solid #000;
 	outline: 0;
+}
+.capital {
+    background: url(/capital.svg) var(--color);
+}
+.city {
+    background: url(/city.svg) var(--color);
 }
 
 .country[data-index="0"] {
