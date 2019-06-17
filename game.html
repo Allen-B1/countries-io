@@ -15,10 +15,17 @@
 		<div id="error"></div>
 
 		<script>
+var map = null;
 
 var ws = new WebSocket("ws://" + location.host + "/ws/game");
 ws.onmessage = function(msg) {
-	console.log(msg.data);
+	if (msg.data.startsWith("update ")) {
+		var data = JSON.parse(msg.data.slice("update ".length));
+		map = data;
+		console.log("update");
+	} else {
+		console.log(msg.data);
+	}
 }
 ws.onopen = function() {
 	var arr = location.hash.slice(1).split(":");
