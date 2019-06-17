@@ -132,6 +132,8 @@ ws.onmessage = function(msg) {
 				cell.addEventListener("click", cell.focus);
 			}
 		}
+		maptable.style.width = (32 * width) + "px";
+		maptable.style.height = (32 * height) + "px";
 	} else if (msg.data.startsWith("player_list ")) {
 		console.log(msg.data);
 		countries = msg.data.split(" ").slice(1);
