@@ -92,17 +92,25 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 
 	if g.Terrain[toTileIndex] == countryIndex {
 		g.Armies[toTileIndex] += g.Armies[fromTileIndex] - 1
+		g.Terrain[toTileIndex] = countryIndex
 	} else {
-		g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1
+		if g.Armies[fromTileIndex]-1 > g.Armies[toTileIndex] { // win
+			g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1 - g.Armies[toTileIndex]
+			g.Terrain[toTileIndex] = countryIndex
+		} else if g.Armies[fromTileIndex]-1 < g.Armies[toTileIndex] { // lose
+			g.Armies[toTileIndex] -= g.Armies[fromTileIndex] - 1
+		} else if g.Armies[fromTileIndex]-1 == g.Armies[toTileIndex] { // tie
+			g.Armies[toTileIndex] = 0
+			g.Terrain[toTileIndex] = TILE_EMPTY
+		}
 	}
 	g.Armies[fromTileIndex] = 1
-	g.Terrain[toTileIndex] = countryIndex
 	return true
 }
 
 // Method MakeCity creates a city
 func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
-	if g.Terrain[tileIndex] != countryIndex || g.Armies[tileIndex] < 31 {
+	if g.Terrain[tileIndex] != countryIndex || g.Armies[tileIndex] < 31 || g.Cities[tileIndex] {
 		return false
 	}
 	g.Armies[tileIndex] -= 30
