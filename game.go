@@ -16,6 +16,9 @@ type Game struct {
 	// The names of the countries
 	Countries []string // name = [countryId]
 
+	Width int
+	Height int
+
 	Terrain  []int        // countryId = [tileIndex]
 	Armies   []uint       // army = [tileIndex]
 	Cities   map[int]bool // isCity = [tileIndex]
@@ -35,6 +38,8 @@ func NewGame(countries []string, width int, height int) *Game {
 		Cities:    make(map[int]bool),
 		Capitals:  make(map[int]bool),
 		Turn:      0,
+		Width: width,
+		Height: height,
 	}
 
 	// Reset to -1

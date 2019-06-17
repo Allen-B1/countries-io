@@ -13,7 +13,9 @@
 	</head>
 	<body>
 		<div id="error"></div>
+		<table id="map">
 
+		</table>
 		<script>
 var map = null;
 
@@ -23,6 +25,18 @@ ws.onmessage = function(msg) {
 		var data = JSON.parse(msg.data.slice("update ".length));
 		map = data;
 		console.log("update");
+	} else if (msg.data.startsWith("map ")) {
+		console.log(msg.data);
+		var width = msg.data.split(" ")[1] | 0,
+			height = msg.data.split(" ")[2] | 0;
+		var maptable = document.getElementById("map");
+		for (let i = 0; i < height; i++) {
+			let row = maptable.insertRow(i);
+			for (let j = 0; j < width; j++) {
+				let cell = row.insertCell(j);
+				cell.id = "cell-" + (i * width + j);
+			}
+		}
 	} else {
 		console.log(msg.data);
 	}
