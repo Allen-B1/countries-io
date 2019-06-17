@@ -56,6 +56,13 @@ func NewGame(countries []string, width int, height int) *Game {
 			}
 			g.Terrain[index] = countryIndex
 			g.Capitals[index] = true
+			for _, tileAround := range g.TilesAround(index, true) {
+				g.Terrain[tileAround] = countryIndex
+				if g.Armies[tileAround] == 0 {
+					g.Armies[tileAround] = 1
+				}
+			}
+
 			break
 			// TODO: 5x5 square around capital
 		}
@@ -97,7 +104,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 			g.Terrain[toTileIndex] = countryIndex
 
 			if g.Cities[toTileIndex] {
-				for _, tileAround := range g.TilesAround(toTileIndex) {
+				for _, tileAround := range g.TilesAround(toTileIndex, false) {
 					g.Terrain[tileAround] = countryIndex
 					if g.Armies[tileAround] == 0 {
 						g.Armies[tileAround] = 1
@@ -106,6 +113,13 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 			}
 
 			if g.Capitals[toTileIndex] {
+				for _, tileAround := range g.TilesAround(toTileIndex, true) {
+					g.Terrain[tileAround] = countryIndex
+					if g.Armies[tileAround] == 0 {
+						g.Armies[tileAround] = 1
+					}
+				}
+
 				delete(g.Capitals, toTileIndex)
 				g.Cities[toTileIndex] = true
 			}
@@ -128,7 +142,7 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 	g.Armies[tileIndex] -= 30
 	g.Cities[tileIndex] = true
 
-	for _, tileAround := range g.TilesAround(tileIndex) {
+	for _, tileAround := range g.TilesAround(tileIndex, false) {
 		g.Terrain[tileAround] = countryIndex
 		if g.Armies[tileAround] == 0 {
 			g.Armies[tileAround] = 1
@@ -168,36 +182,40 @@ func (g *Game) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (g *Game) TilesAround(tile int) []int {
+func (g *Game) TilesAround(tile int, big bool) []int {
 	out := make([]int, 0)
-	out = append(out, tile)
-	hasLeft := tile%g.Width != 0
-	hasRight := tile%g.Width != g.Width-1
-	hasTop := tile >= g.Width
-	hasBottom := tile < g.Width*(g.Height-1)
-	if hasLeft {
-		out = append(out, tile-1)
+	tileCol := tile % g.Width
+	tileRow := tile / g.Width
+	startCol := tileCol - 1
+	endCol := tileCol + 1
+	startRow := tileRow - 1
+	endRow := tileRow + 1
+
+	if big {
+		startCol -= 1
+		endCol += 1
+		startRow -= 1
+		endRow += 1
 	}
-	if hasRight {
-		out = append(out, tile+1)
+
+	if startCol < 0 {
+		startCol = 0
 	}
-	if hasTop {
-		out = append(out, tile-g.Width)
+	if endCol > g.Width - 1 {
+		endCol = g.Width - 1
 	}
-	if hasBottom {
-		out = append(out, tile-g.Height)
+	if startRow < 0 {
+		startRow = 0
 	}
-	if hasLeft && hasTop {
-		out = append(out, tile-g.Width-1)
+	if endRow > g.Height - 1 {
+		endRow = g.Height - 1
 	}
-	if hasRight && hasTop {
-		out = append(out, tile-g.Width+1)
+
+	for row := startRow; row <= endRow; row++ {
+		for col := startCol; col <= endCol; col++ {
+			out = append(out, row * g.Width + col)
+		}
 	}
-	if hasLeft && hasBottom {
-		out = append(out, tile+g.Width-1)
-	}
-	if hasRight && hasBottom {
-		out = append(out, tile+g.Width+1)
-	}
+
 	return out
 }

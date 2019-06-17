@@ -39,6 +39,6 @@ func (r *Room) Game() *Game {
 	for country, _ := range r.Countries {
 		countrylist = append(countrylist, country)
 	}
-	game := NewGame(countrylist, 20, 20)
+	game := NewGame(countrylist, 40, 40)
 	return game
 }
