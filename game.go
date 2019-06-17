@@ -82,7 +82,6 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 	// TODO: Make legit
 	// * Check if tiles are next to each other
 	// * Capturing cities/capitals = gaining 3x3/5x5 square
-	// * Capture capitals => cities
 	if g.Terrain[fromTileIndex] != countryIndex ||
 		g.Armies[fromTileIndex] < 2 ||
 		toTileIndex >= len(g.Terrain) || toTileIndex < 0 {
@@ -96,6 +95,15 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 		if g.Armies[fromTileIndex]-1 > g.Armies[toTileIndex] { // win
 			g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1 - g.Armies[toTileIndex]
 			g.Terrain[toTileIndex] = countryIndex
+
+			if g.Cities[toTileIndex] {
+				for _, tileAround := range g.TilesAround(toTileIndex) {
+					g.Terrain[tileAround] = countryIndex
+					if g.Armies[tileAround] == 0 {
+						g.Armies[tileAround] = 1
+					}
+				}
+			}
 
 			if g.Capitals[toTileIndex] {
 				delete(g.Capitals, toTileIndex)
@@ -120,6 +128,12 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 	g.Armies[tileIndex] -= 30
 	g.Cities[tileIndex] = true
 
+	for _, tileAround := range g.TilesAround(tileIndex) {
+		g.Terrain[tileAround] = countryIndex
+		if g.Armies[tileAround] == 0 {
+			g.Armies[tileAround] = 1
+		}
+	}
 	// TODO: +1 army in 3x3 square around city
 	return true
 }
@@ -152,4 +166,38 @@ func (g *Game) MarshalJSON() ([]byte, error) {
 		"cities":   citylist,
 		"capitals": capitallist,
 	})
+}
+
+func (g *Game) TilesAround(tile int) []int {
+	out := make([]int, 0)
+	out = append(out, tile)
+	hasLeft := tile%g.Width != 0
+	hasRight := tile%g.Width != g.Width-1
+	hasTop := tile >= g.Width
+	hasBottom := tile < g.Width*(g.Height-1)
+	if hasLeft {
+		out = append(out, tile-1)
+	}
+	if hasRight {
+		out = append(out, tile+1)
+	}
+	if hasTop {
+		out = append(out, tile-g.Width)
+	}
+	if hasBottom {
+		out = append(out, tile-g.Height)
+	}
+	if hasLeft && hasTop {
+		out = append(out, tile-g.Width-1)
+	}
+	if hasRight && hasTop {
+		out = append(out, tile-g.Width+1)
+	}
+	if hasLeft && hasBottom {
+		out = append(out, tile+g.Width-1)
+	}
+	if hasRight && hasBottom {
+		out = append(out, tile+g.Width+1)
+	}
+	return out
 }
