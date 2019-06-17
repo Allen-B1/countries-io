@@ -81,7 +81,6 @@ func (g *Game) NextTurn() {
 func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool {
 	// TODO: Make legit
 	// * Check if tiles are next to each other
-	// * Compare army sizes
 	// * Capturing cities/capitals = gaining 3x3/5x5 square
 	// * Capture capitals => cities
 	if g.Terrain[fromTileIndex] != countryIndex ||
@@ -97,6 +96,11 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 		if g.Armies[fromTileIndex]-1 > g.Armies[toTileIndex] { // win
 			g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1 - g.Armies[toTileIndex]
 			g.Terrain[toTileIndex] = countryIndex
+
+			if g.Capitals[toTileIndex] {
+				delete(g.Capitals, toTileIndex)
+				g.Cities[toTileIndex] = true
+			}
 		} else if g.Armies[fromTileIndex]-1 < g.Armies[toTileIndex] { // lose
 			g.Armies[toTileIndex] -= g.Armies[fromTileIndex] - 1
 		} else if g.Armies[fromTileIndex]-1 == g.Armies[toTileIndex] { // tie
