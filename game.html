@@ -14,23 +14,25 @@
 	height:32px;
 	color: #fff;
 	text-align: center;
+    background: hsl(var(--color), 75%, 65%);
+	font-size: 12px;
 }
 #map, #countries {
 	border-collapse: collapse; }
 #map {
-	background: #ddd; }
+	background: transparent; }
 #countries {
 	position: fixed;
 	top: 16px; right: 16px;
+	background: #ddd;
+	color: #fff;
 }
 body {
-	margin: 0; padding: 16px;
+	margin: 0; padding: 0;
 }
 #countries td {
-	padding: 4px 12px;
+	padding: 8px 12px;
 }
-.tile {
-    background: var(--color); }
 .tile[data-terrain="-2"] {
 	background: #888;
     color: #fff; }
@@ -38,40 +40,39 @@ body {
     background: transparent;
 	color: #111; }
 .tile[data-terrain="0"] {
-    --color: hsl(0, 75%, 65%); }
+    --color: 0; }
 .tile[data-terrain="1"] {
-    --color: hsl(200, 75%, 65%); }
+    --color: 200; }
 .tile[data-terrain="2"] {
-    --color: hsl(100, 75%, 65%); }
+    --color: 100; }
 .tile[data-terrain="3"] {
-    --color: hsl(35, 75%, 65%); }
+    --color: 35; }
 .tile[data-terrain="4"] {
-    --color: hsl(70, 75%, 65%); }
+    --color: 70; }
 .tile[data-terrain="5"] {
-    --color: hsl(300, 75%, 65%); }
+    --color: 300; }
 .tile:focus {
-	border: 2px solid #000;
-	outline: 0;
+	outline: 2px solid hsl(var(--color), 65%, 55%);
 }
 .capital {
-    background: url(/capital.svg) var(--color);
+    background: url(/capital.svg) hsl(var(--color), 75%, 65%);
 }
 .city {
-    background: url(/city.svg) var(--color);
+    background: url(/city.svg) hsl(var(--color), 75%, 65%);
 }
 
 .country[data-index="0"] {
-	color: hsl(0, 75%, 55%); }
+	background: hsl(0, 75%, 65%); }
 .country[data-index="1"] {
-	color: hsl(200, 75%, 55%); }
+	background: hsl(200, 75%, 65%); }
 .country[data-index="2"] {
-	color: hsl(100, 75%, 55%); }
+	background: hsl(100, 75%, 65%); }
 .country[data-index="3"] {
-	color: hsl(35, 75%, 55%); }
+	background: hsl(35, 75%, 65%); }
 .country[data-index="4"] {
-	color: hsl(70, 75%, 55%); }
+	background: hsl(70, 75%, 65%); }
 .country[data-index="5"] {
-	color: hsl(300, 75%, 55%); }
+	background: hsl(300, 75%, 65%); }
 		</style>
 	</head>
 	<body>
