@@ -94,8 +94,9 @@ ws.onmessage = function(msg) {
 	}
 }
 ws.onopen = function() {
-	ws.send("join " + location.pathname.slice(1) + " " + location.search.slice(9));
-	document.getElementById("country").innerHTML = location.search.slice(9);
+	var countryName = location.search.slice(9).replace(/\+/g, " ").replace(/\s+/g, "_");
+	ws.send("join " + location.pathname.slice(1) + " " + countryName);
+	document.getElementById("country").innerText = countryName.replace(/_/g, " ");
 }
 		</script>
 	</body>

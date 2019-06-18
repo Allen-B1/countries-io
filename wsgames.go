@@ -153,7 +153,6 @@ func startGameThread(gameId string, game *Game) {
 			case data := <-attack:
 				game.Attack(countryIndex, data[0], data[1])
 			default:
-				continue
 			}
 		}
 
@@ -166,6 +165,8 @@ func startGameThread(gameId string, game *Game) {
 
 		// if only one person left stop
 		if len(game.Countries)-len(game.Losers) <= 1 {
+			delete(games, gameId)
+			delete(gameThreads, gameId)
 			return
 		}
 	}
