@@ -58,6 +58,16 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			conn.WriteMessage(websocket.TextMessage, []byte("error "+err.Error()))
 			return
 		}
+
+		if index >= 0 {
+			for _, info := range gameConns {
+				if info.Game == gameId && info.Index == index {
+					conn.WriteMessage(websocket.TextMessage, []byte("error somebody took your place"))
+					return
+				}
+			}
+		}
+
 		gameConns[conn] = gameConnInfo{Game: gameId, Index: index}
 		game := games[gameId]
 
@@ -70,6 +80,12 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 	if !ok {
 		return
 	}
+
+	if info.Index < 0 {
+		// actions are not allowed
+		return
+	}
+
 	game, ok := games[info.Game]
 	if !ok {
 		return
@@ -146,5 +162,10 @@ func startGameThread(gameId string, game *Game) {
 		}
 
 		broadcastGame(gameId, "player_lose"+(loserstr))
+
+		// if only one person left stop
+		if len(game.Countries)-len(game.Losers) <= 1 {
+			return
+		}
 	}
 }
