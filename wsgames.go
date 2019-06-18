@@ -35,18 +35,10 @@ type gameThread struct {
 var gameThreads = make(map[string]gameThread)
 
 func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
-	if mt == websocket.CloseMessage {
-		info, ok := gameConns[conn]
-		if !ok {
-			return
-		}
-		broadcastGame(info.Game, "player_leave "+fmt.Sprint(info.Index))
+	if mt != websocket.CloseMessage && len(args) == 0 {
 		return
 	}
-	if len(args) == 0 {
-		return
-	}
-	if args[0] == "join" {
+	if mt == websocket.TextMessage && args[0] == "join" {
 		_, ok := gameConns[conn]
 		if ok {
 			return
@@ -83,6 +75,11 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		return
 	}
 	thread := gameThreads[info.Game]
+
+	if mt == websocket.CloseMessage {
+		game.Leave(info.Index)
+		return
+	}
 
 	switch args[0] {
 	case "attack":
@@ -142,5 +139,12 @@ func startGameThread(gameId string, game *Game) {
 			default:
 			}
 		}
+
+		loserstr := ""
+		for loser, _ := range game.Losers {
+			loserstr += " " + fmt.Sprint(loser)
+		}
+
+		broadcastGame(gameId, "player_lose"+(loserstr))
 	}
 }

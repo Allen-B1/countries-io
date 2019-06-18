@@ -26,6 +26,8 @@ type Game struct {
 	Cities   map[int]bool // isCity = [tileIndex]
 	Capitals map[int]bool // isCaptial = [tileIndex]
 
+	Losers map[int]bool // People who lost
+
 	// The current turn #
 	Turn int
 }
@@ -39,6 +41,7 @@ func NewGame(countries []string, width int, height int) *Game {
 		Armies:    make([]uint, size),
 		Cities:    make(map[int]bool),
 		Capitals:  make(map[int]bool),
+		Losers:    make(map[int]bool),
 		Turn:      0,
 		Width:     width,
 		Height:    height,
@@ -76,7 +79,15 @@ func NewGame(countries []string, width int, height int) *Game {
 
 // Method NextTurn
 func (g *Game) NextTurn() {
-	for index, _ := range g.Terrain {
+outer:
+	for index, terrain := range g.Terrain {
+		// Don't increase anything for not-in-game-anymore people
+		for loser, _ := range g.Losers {
+			if terrain == loser {
+				continue outer
+			}
+		}
+
 		switch g.TileType(index) {
 		case TILE_WALL:
 			continue
@@ -126,6 +137,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 		g.Armies[toTileIndex] += g.Armies[fromTileIndex] - 1
 		g.Terrain[toTileIndex] = countryIndex
 	} else {
+		toCountry := g.Terrain[toTileIndex]
 		if g.Armies[fromTileIndex]-1 > g.Armies[toTileIndex] { // win
 			g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1 - g.Armies[toTileIndex]
 
@@ -147,9 +159,11 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 			g.Armies[toTileIndex] = 0
 			g.Terrain[toTileIndex] = TILE_EMPTY
 		}
-	}
 
-	g.ApplyLoopRule(countryIndex)
+		if toCountry >= 0 {
+			g.checkLoss(toCountry)
+		}
+	}
 
 	g.Armies[fromTileIndex] = 1
 	return true
@@ -179,6 +193,10 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	g.Armies[tileIndex] *= 5
 	g.Terrain[tileIndex] = TILE_WALL
 	return true
+}
+
+func (g *Game) Leave(countryIndex int) {
+	g.Losers[countryIndex] = true
 }
 
 // Method MarshalJSON implements the json.Marshaler interface
@@ -279,6 +297,17 @@ func (g *Game) TileType(tile int) int {
 	return TILE_RURAL
 }
 
-func (g *Game) ApplyLoopRule(countryIndex int) {
-	// TODO: If an area (TILE_EMPTY or TILE_WALL) is completely surrounded by a country, all TILE_EMPTYs will => that country w/army = 0
+func (g *Game) checkLoss(countryIndex int) {
+	log.Println(countryIndex, "lost?")
+	if g.Losers[countryIndex] {
+		return
+	}
+	for index, terrain := range g.Terrain {
+		if terrain == countryIndex {
+			log.Println("nope,", index)
+			return // not lost yet
+		}
+	}
+	log.Println(countryIndex, "lost!")
+	g.Losers[countryIndex] = true
 }

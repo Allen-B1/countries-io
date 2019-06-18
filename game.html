@@ -175,10 +175,12 @@ ws.onmessage = function(msg) {
 			celltotal.classList.add("total");
 			celltotal.id = "total-" + i;
 		}
-	} else if (msg.data.startsWith("player_lose ") || msg.data.startsWith("player_leave ")) {
-		var country = msg.data.split(" ")[1];
-		var elem = document.getElementById("country-" + country);
-		elem.style.setProperty("text-decoration", "line-through");
+	} else if (msg.data.startsWith("player_lose ")) {
+		for (var country of msg.data.split(" ").slice(1)) {
+			var elem = document.getElementById("country-" + country);
+			if (elem !== null)
+				elem.style.setProperty("text-decoration", "line-through");
+		}
 	}
 }
 ws.onopen = function() {
