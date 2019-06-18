@@ -107,7 +107,10 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		if err1 != nil || err2 != nil {
 			log.Println("Error: ", err1, " or ", err2)
 		}
-		thread.Attack[info.Index] <- [2]int{fromTile, toTile}
+		select {
+		case thread.Attack[info.Index] <- [2]int{fromTile, toTile}:
+		case <-time.After(500 * time.Millisecond):
+		}
 	case "city", "wall":
 		if len(args) != 2 {
 			return
@@ -132,10 +135,7 @@ func startGameThread(gameId string, game *Game) {
 
 	gameThreads[gameId] = thread
 
-	dur, err := time.ParseDuration("500ms")
-	if err != nil {
-		panic(err.Error())
-	}
+	dur := 500 * time.Millisecond
 	for {
 		// broadcast update
 		data, err := json.Marshal(game)
@@ -153,6 +153,7 @@ func startGameThread(gameId string, game *Game) {
 			case data := <-attack:
 				game.Attack(countryIndex, data[0], data[1])
 			default:
+				continue
 			}
 		}
 
