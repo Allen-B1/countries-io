@@ -76,7 +76,12 @@ body {
 		<table id="countries"></table>
 		<table id="map"></table>
 		<script>
-var map = null;
+var map = {
+	terrain: [],
+	armies: [],
+	capitals: [],
+	cities: []
+};
 var countries = [];
 var width, height;
 var gameId, countryIndex;
@@ -91,6 +96,23 @@ function totalArmy(fCountryIndex) {
 	return total;
 }
 
+function patch(old, diff) {
+	var out = [];
+	var i = 0;
+	while (i < diff.length) {
+		if (diff[i]) {  // matching
+			Array.prototype.push.apply(out, old.slice(out.length, out.length + diff[i]));
+		}
+		i++;
+		if (i < diff.length && diff[i]) {  // mismatching
+			Array.prototype.push.apply(out, diff.slice(i + 1, i + 1 + diff[i]));
+			i += diff[i];
+		}
+		i++;
+	}
+	return out;
+}
+
 var capitalSelected = false;
 
 var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/game");
@@ -99,7 +121,10 @@ ws.onmessage = function(msg) {
 
 	if (msg.data.startsWith("update ")) {
 		var data = JSON.parse(msg.data.slice("update ".length));
-		map = data;
+		map.cities = data.cities;
+		map.capitals = data.capitals;
+		map.terrain = patch(map.terrain, data.terrain_diff);
+		map.armies = patch(map.armies, data.armies_diff);
 
 		for (var i = 0; i < map.terrain.length; i++) {
 			var elem = document.getElementById("tile-" + i);

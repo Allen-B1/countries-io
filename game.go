@@ -199,8 +199,15 @@ func (g *Game) Leave(countryIndex int) {
 	g.Losers[countryIndex] = true
 }
 
-// Method MarshalJSON implements the json.Marshaler interface
-func (g *Game) MarshalJSON() ([]byte, error) {
+// TODO: Make this actually do stuff
+func createDiff(old []int, new_ []int) []int {
+	out := []int{0, len(old)}
+	out = append(out, new_...)
+	return out
+}
+
+// Method MarshalJSON creates json
+func (g *Game) MarshalJSON(old *Game) ([]byte, error) {
 	citylist := make([]int, 0, len(g.Cities))
 	capitallist := make([]int, 0, len(g.Capitals))
 	for city, _ := range g.Cities {
@@ -212,11 +219,28 @@ func (g *Game) MarshalJSON() ([]byte, error) {
 	sort.Ints(citylist)
 	sort.Ints(capitallist)
 
+	if old == nil {
+		old = &Game{
+			Terrain: nil,
+			Armies:  nil,
+		}
+	}
+	terraindiff := createDiff(old.Terrain, g.Terrain)
+	armiesold := make([]int, 0)
+	for _, army := range old.Armies {
+		armiesold = append(armiesold, int(army))
+	}
+	armiesnew := make([]int, 0)
+	for _, army := range g.Armies {
+		armiesnew = append(armiesnew, int(army))
+	}
+	armiesdiff := createDiff(armiesold, armiesnew)
+
 	return json.Marshal(map[string]interface{}{
-		"terrain":  g.Terrain,
-		"armies":   g.Armies,
-		"cities":   citylist,
-		"capitals": capitallist,
+		"terrain_diff": terraindiff,
+		"armies_diff":  armiesdiff,
+		"cities":       citylist,
+		"capitals":     capitallist,
 	})
 }
 

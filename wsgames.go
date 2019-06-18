@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -136,14 +135,16 @@ func startGameThread(gameId string, game *Game) {
 	gameThreads[gameId] = thread
 
 	dur := 500 * time.Millisecond
+	old := (*Game)(nil)
 	for {
 		// broadcast update
-		data, err := json.Marshal(game)
+		data, err := game.MarshalJSON(old)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		broadcastGame(gameId, "update "+string(data))
+		old = game
 		time.Sleep(dur)
 		game.NextTurn()
 
