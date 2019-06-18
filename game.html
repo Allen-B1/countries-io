@@ -84,6 +84,8 @@ var countries = [];
 var width, height;
 var gameId, countryIndex;
 
+var capitalSelected = false;
+
 var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/game");
 ws.onmessage = function(msg) {
 	if (msg.data.startsWith("update ")) {
@@ -107,14 +109,15 @@ ws.onmessage = function(msg) {
 			var elem = document.getElementById("tile-" + tile);
             elem.classList.add("city");
         }
-        if (!(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
+        if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
 			for (var capital of map.capitals) {
 				if (map.terrain[capital] == countryIndex) {
 		            document.getElementById("tile-" + capital).focus();
+					capitalSelected = true;
 					break;
 				}
 			}
-       }
+		}
 		console.log("update");
 	} else if (msg.data.startsWith("map ")) {
 		console.log(msg.data);
@@ -129,7 +132,12 @@ ws.onmessage = function(msg) {
 				cell.id = "tile-" + (i * width + j);
 				cell.classList.add("tile");
 				cell.setAttribute("tabindex", "-1");
-				cell.addEventListener("click", cell.focus);
+				cell.addEventListener("click", function(e) {
+					if (map.terrain[this.id.slice(5)] === countryIndex)
+						this.focus();
+					else
+						this.blur();
+				});
 			}
 		}
 		maptable.style.width = (32 * width) + "px";
