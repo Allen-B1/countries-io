@@ -114,6 +114,14 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 		return false
 	}
 
+	fromRow := fromTileIndex / g.Width
+	toRow := toTileIndex / g.Width
+	fromCol := fromTileIndex % g.Width
+	toCol := toTileIndex % g.Width
+	if fromRow != toRow && fromCol != toCol { // TODO: Expand
+		return false
+	}
+
 	if g.Terrain[toTileIndex] == countryIndex {
 		g.Armies[toTileIndex] += g.Armies[fromTileIndex] - 1
 		g.Terrain[toTileIndex] = countryIndex
@@ -139,6 +147,9 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 			g.Terrain[toTileIndex] = TILE_EMPTY
 		}
 	}
+
+	g.ApplyLoopRule(countryIndex)
+
 	g.Armies[fromTileIndex] = 1
 	return true
 }
@@ -268,4 +279,8 @@ func (g *Game) TileType(tile int) int {
 		}
 	}
 	return TILE_RURAL
+}
+
+func (g *Game) ApplyLoopRule(countryIndex int) {
+	// TODO: If an area (TILE_EMPTY or TILE_WALL) is completely surrounded by a country, all TILE_EMPTYs will => that country w/army = 0
 }
