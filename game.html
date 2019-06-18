@@ -40,41 +40,35 @@ body {
 .tile[data-terrain="-1"] {
     background: transparent;
 	color: #111; }
-.tile[data-terrain="0"] {
+.tile[data-terrain="0"], [data-index="0"] {
     --color: 0; }
-.tile[data-terrain="1"] {
+.tile[data-terrain="1"], [data-index="1"] {
     --color: 200; }
-.tile[data-terrain="2"] {
+.tile[data-terrain="2"], [data-index="2"] {
     --color: 100; }
-.tile[data-terrain="3"] {
+.tile[data-terrain="3"], [data-index="3"] {
     --color: 35; }
-.tile[data-terrain="4"] {
+.tile[data-terrain="4"], [data-index="4"] {
     --color: 70; }
-.tile[data-terrain="5"] {
+.tile[data-terrain="5"], [data-index="5"] {
     --color: 300; }
 .tile:focus {
 	outline: 2px solid hsl(var(--color), 65%, 55%);
 }
+.tile[data-terrain="-2"]:focus {
+	outline: 2px solid #333; }
+.tile[data-terrain="-1"]:focus {
+	outline: 2px solid #aaa; }
 .capital {
     background: url(/capital.svg) hsl(var(--color), 75%, 65%);
 }
 .city {
     background: url(/city.svg) hsl(var(--color), 75%, 65%);
 }
-
-.country[data-index="0"] {
-	color: hsl(0, 75%, 65%); }
-.country[data-index="1"] {
-	color: hsl(200, 75%, 65%); }
-.country[data-index="2"] {
-	color: hsl(100, 75%, 65%); }
-.country[data-index="3"] {
-	color: hsl(35, 75%, 65%); }
-.country[data-index="4"] {
-	color: hsl(70, 75%, 65%); }
-.country[data-index="5"] {
-	color: hsl(300, 75%, 65%); }
-		</style>
+.country {
+	color: hsl(var(--color), 75%, 65%);
+}
+	</style>
 	</head>
 	<body>
 		<audio src="/sound.wav" autoplay></audio>
@@ -101,6 +95,8 @@ var capitalSelected = false;
 
 var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/game");
 ws.onmessage = function(msg) {
+	if (!msg.data.startsWith("update")) console.log("ws: " + msg.data);
+
 	if (msg.data.startsWith("update ")) {
 		var data = JSON.parse(msg.data.slice("update ".length));
 		map = data;
@@ -138,10 +134,7 @@ ws.onmessage = function(msg) {
 			var elem = document.getElementById("total-" + i);
 			elem.innerHTML = totalArmy(i);
 		}
-
-		console.log("update");
 	} else if (msg.data.startsWith("map ")) {
-		console.log(msg.data);
 		width = msg.data.split(" ")[1] | 0;
 		height = msg.data.split(" ")[2] | 0;
 
@@ -164,15 +157,15 @@ ws.onmessage = function(msg) {
 		maptable.style.width = (32 * width) + "px";
 		maptable.style.height = (32 * height) + "px";
 	} else if (msg.data.startsWith("player_list ")) {
-		console.log(msg.data);
 		countries = msg.data.split(" ").slice(1);
 		var table = document.getElementById("countries");
 		for (let i = 0; i < countries.length; i++) {
 			let row = table.insertRow(i);
+			row.setAttribute("data-index", i);
+			row.id = "country-" + i;
 			let cellname = row.insertCell(0);
 			cellname.innerHTML = countries[i];
 			cellname.classList.add("country");
-			cellname.setAttribute("data-index", i);
 			if (i == countryIndex) {
 				row.style.fontWeight = "bold";
 			}
@@ -182,8 +175,10 @@ ws.onmessage = function(msg) {
 			celltotal.classList.add("total");
 			celltotal.id = "total-" + i;
 		}
-	} else {
-		console.log(msg.data);
+	} else if (msg.data.startsWith("player_lose ") || msg.data.startsWith("player_leave ")) {
+		var country = msg.data.split(" ")[1];
+		var elem = document.getElementById("country-" + country);
+		elem.style.setProperty("text-decoration", "line-through");
 	}
 }
 ws.onopen = function() {

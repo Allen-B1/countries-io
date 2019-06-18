@@ -104,6 +104,7 @@ func roomThread(roomId string, room *Room) {
 		}
 	}
 }
+
 func startGame(roomId string, room *Room) {
 	game := room.Game()
 	// broadcast start
@@ -122,5 +123,5 @@ func startGame(roomId string, room *Room) {
 		}
 	}
 
-	go gameThread(gameId, game)
+	go startGameThread(gameId, game)
 }

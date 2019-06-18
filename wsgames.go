@@ -28,6 +28,12 @@ func broadcastGame(gameId string, message string) {
 	}
 }
 
+type gameThread struct {
+	Attack [](chan [2]int)
+}
+
+var gameThreads = make(map[string]gameThread)
+
 func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 	if mt == websocket.CloseMessage {
 		info, ok := gameConns[conn]
@@ -76,6 +82,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 	if !ok {
 		return
 	}
+	thread := gameThreads[info.Game]
 
 	switch args[0] {
 	case "attack":
@@ -87,7 +94,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		if err1 != nil || err2 != nil {
 			log.Println("Error: ", err1, " or ", err2)
 		}
-		game.Attack(info.Index, fromTile, toTile)
+		thread.Attack[info.Index] <- [2]int{fromTile, toTile}
 	case "city", "wall":
 		if len(args) != 2 {
 			return
@@ -104,7 +111,14 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 	}
 }
 
-func gameThread(gameId string, game *Game) {
+func startGameThread(gameId string, game *Game) {
+	thread := gameThread{}
+	for _, _ = range game.Countries {
+		thread.Attack = append(thread.Attack, make(chan [2]int))
+	}
+
+	gameThreads[gameId] = thread
+
 	dur, err := time.ParseDuration("500ms")
 	if err != nil {
 		panic(err.Error())
@@ -119,5 +133,14 @@ func gameThread(gameId string, game *Game) {
 		broadcastGame(gameId, "update "+string(data))
 		time.Sleep(dur)
 		game.NextTurn()
+
+		// Read attacks
+		for countryIndex, attack := range thread.Attack {
+			select {
+			case data := <-attack:
+				game.Attack(countryIndex, data[0], data[1])
+			default:
+			}
+		}
 	}
 }
