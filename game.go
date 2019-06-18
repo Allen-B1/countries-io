@@ -65,7 +65,7 @@ func NewGame(countries []string, width int, height int) *Game {
 
 			g.Terrain[index] = countryIndex
 			g.Capitals[index] = true
-			g.ConvertAround(index, 2, countryIndex)
+			g.ConvertAround(index, 2, countryIndex, TILE_EMPTY)
 
 			break
 		}
@@ -128,18 +128,19 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 	} else {
 		if g.Armies[fromTileIndex]-1 > g.Armies[toTileIndex] { // win
 			g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1 - g.Armies[toTileIndex]
-			g.Terrain[toTileIndex] = countryIndex
 
 			if g.Cities[toTileIndex] {
-				g.ConvertAround(toTileIndex, 1, countryIndex)
+				g.ConvertAround(toTileIndex, 1, countryIndex, g.Terrain[toTileIndex])
 			}
 
 			if g.Capitals[toTileIndex] {
-				g.ConvertAround(toTileIndex, 2, countryIndex)
+				g.ConvertAround(toTileIndex, 2, countryIndex, g.Terrain[toTileIndex])
 
 				delete(g.Capitals, toTileIndex)
 				g.Cities[toTileIndex] = true
 			}
+
+			g.Terrain[toTileIndex] = countryIndex
 		} else if g.Armies[fromTileIndex]-1 < g.Armies[toTileIndex] { // lose
 			g.Armies[toTileIndex] -= g.Armies[fromTileIndex] - 1
 		} else if g.Armies[fromTileIndex]-1 == g.Armies[toTileIndex] { // tie
@@ -167,7 +168,7 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 
 	g.Armies[tileIndex] -= 30
 	g.Cities[tileIndex] = true
-	g.ConvertAround(tileIndex, 1, countryIndex)
+	g.ConvertAround(tileIndex, 1, countryIndex, TILE_EMPTY)
 	return true
 }
 
@@ -232,12 +233,9 @@ func (g *Game) TilesAround(tile int, r int) []int {
 	return out
 }
 
-func (g *Game) ConvertAround(tile int, r int, countryIndex int) {
+func (g *Game) ConvertAround(tile int, r int, countryIndex int, fromCountryIndex int) {
 	for _, tileAround := range g.TilesAround(tile, r) {
-		if g.Cities[tileAround] || g.Capitals[tileAround] {
-			continue
-		}
-		if g.Terrain[tileAround] == TILE_WALL { // Don't convert walls
+		if g.Terrain[tileAround] != fromCountryIndex {
 			continue
 		}
 		g.Terrain[tileAround] = countryIndex
