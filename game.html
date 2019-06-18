@@ -77,6 +77,7 @@ body {
 		</style>
 	</head>
 	<body>
+		<audio src="/sound.wav" autoplay></audio>
 		<div id="error"></div>
 		<table id="countries"></table>
 		<table id="map"></table>
@@ -108,7 +109,9 @@ ws.onmessage = function(msg) {
 			var elem = document.getElementById("tile-" + i);
 			if (elem != null) {
 				elem.setAttribute("data-terrain", map.terrain[i]);
-				if (map.terrain[i] >= 0 || map.armies[i] > 0) {
+				if (map.terrain[i] == -1 && map.armies[i] == 0) {
+					elem.innerHTML = "";
+				} else {
 					elem.innerHTML = map.armies[i];
 				}
 			}

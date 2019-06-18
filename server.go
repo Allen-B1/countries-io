@@ -27,6 +27,9 @@ func main() {
 	http.HandleFunc("/capital.svg", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "capital.svg")
 	})
+	http.HandleFunc("/sound.wav", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "sound.wav")
+	})
 
 	http.HandleFunc("/ws/room", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
