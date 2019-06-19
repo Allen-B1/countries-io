@@ -358,7 +358,6 @@ func (g *Game) TileType(tile int) int {
 }
 
 func (g *Game) checkLoss(countryIndex int) {
-	log.Println(countryIndex, "lost?")
 	if g.Losers[countryIndex] {
 		return
 	}
@@ -368,6 +367,5 @@ func (g *Game) checkLoss(countryIndex int) {
 			return // not lost yet
 		}
 	}
-	log.Println(countryIndex, "lost!")
 	g.Losers[countryIndex] = true
 }

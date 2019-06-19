@@ -167,9 +167,10 @@ func startGameThread(gameId string, game *Game) {
 		}
 	}
 
-	dur := 500 * time.Millisecond
+	dur := 250 * time.Millisecond
 	oldterrain := make([]int, 0)
 	oldarmies := make([]uint, 0)
+	turn := false
 	for {
 		// broadcast update
 		data, err := game.MarshalJSON(oldterrain, oldarmies)
@@ -189,7 +190,10 @@ func startGameThread(gameId string, game *Game) {
 			copy(oldarmies, game.Armies)
 		}
 		time.Sleep(dur)
-		game.NextTurn()
+		turn = !turn
+		if turn {
+			game.NextTurn()
+		}
 
 		// Read attacks
 		for countryIndex, attack := range thread.Attack {
