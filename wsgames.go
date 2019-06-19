@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -17,14 +18,21 @@ type gameConnInfo struct {
 	Index int
 }
 
-var gameConns = make(map[*websocket.Conn]gameConnInfo)
+var gameConns = struct {
+	Map map[*websocket.Conn]gameConnInfo
+	sync.Mutex
+}{
+	Map: make(map[*websocket.Conn]gameConnInfo),
+}
 
 func broadcastGame(gameId string, message string) {
-	for conn, info := range gameConns {
+	gameConns.Lock()
+	for conn, info := range gameConns.Map {
 		if info.Game == gameId {
 			conn.WriteMessage(websocket.TextMessage, []byte(message))
 		}
 	}
+	gameConns.Unlock()
 }
 
 type gameThread struct {
@@ -38,7 +46,9 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		return
 	}
 	if mt == websocket.TextMessage && args[0] == "join" {
-		_, ok := gameConns[conn]
+		gameConns.Lock()
+		_, ok := gameConns.Map[conn]
+		gameConns.Unlock()
 		if ok {
 			return
 		}
@@ -59,15 +69,21 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		}
 
 		if index >= 0 {
-			for _, info := range gameConns {
+			gameConns.Lock()
+			for _, info := range gameConns.Map {
 				if info.Game == gameId && info.Index == index {
 					conn.WriteMessage(websocket.TextMessage, []byte("error somebody took your place"))
+					gameConns.Unlock()
 					return
 				}
 			}
+			gameConns.Unlock()
 		}
 
-		gameConns[conn] = gameConnInfo{Game: gameId, Index: index}
+		gameConns.Lock()
+		gameConns.Map[conn] = gameConnInfo{Game: gameId, Index: index}
+		gameConns.Unlock()
+
 		game := games[gameId]
 
 		conn.WriteMessage(websocket.TextMessage, []byte("player_list "+strings.Join(game.Countries, " ")))
@@ -75,7 +91,9 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		return
 	}
 
-	info, ok := gameConns[conn]
+	gameConns.Lock()
+	info, ok := gameConns.Map[conn]
+	gameConns.Unlock()
 	if !ok {
 		return
 	}
@@ -134,17 +152,42 @@ func startGameThread(gameId string, game *Game) {
 
 	gameThreads[gameId] = thread
 
+	// wait for all to join
+	for {
+		n := 0
+		gameConns.Lock()
+		for _, info := range gameConns.Map {
+			if info.Game == gameId {
+				n++
+			}
+		}
+		gameConns.Unlock()
+		if n >= len(game.Countries) {
+			break
+		}
+	}
+
 	dur := 500 * time.Millisecond
-	old := (*Game)(nil)
+	oldterrain := make([]int, 0)
+	oldarmies := make([]uint, 0)
 	for {
 		// broadcast update
-		data, err := game.MarshalJSON(old)
+		data, err := game.MarshalJSON(oldterrain, oldarmies)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		broadcastGame(gameId, "update "+string(data))
-		old = game
+		if len(oldterrain) != len(game.Terrain) {
+			oldterrain = append([]int(nil), game.Terrain...)
+		} else {
+			copy(oldterrain, game.Terrain)
+		}
+		if len(oldarmies) != len(game.Armies) {
+			oldarmies = append([]uint(nil), game.Armies...)
+		} else {
+			copy(oldarmies, game.Armies)
+		}
 		time.Sleep(dur)
 		game.NextTurn()
 
@@ -157,12 +200,14 @@ func startGameThread(gameId string, game *Game) {
 			}
 		}
 
-		loserstr := ""
-		for loser, _ := range game.Losers {
-			loserstr += " " + fmt.Sprint(loser)
-		}
+		if len(game.Losers) != 0 {
+			loserstr := ""
+			for loser, _ := range game.Losers {
+				loserstr += " " + fmt.Sprint(loser)
+			}
 
-		broadcastGame(gameId, "player_lose"+(loserstr))
+			broadcastGame(gameId, "player_lose"+(loserstr))
+		}
 
 		// if only one person left stop
 		if len(game.Countries)-len(game.Losers) <= 1 {

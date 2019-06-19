@@ -201,13 +201,51 @@ func (g *Game) Leave(countryIndex int) {
 
 // TODO: Make this actually do stuff
 func createDiff(old []int, new_ []int) []int {
-	out := []int{0, len(old)}
-	out = append(out, new_...)
+	out := make([]int, 0)
+	if len(old) == 0 {
+		out = append(out, 0, len(new_))
+		out = append(out, new_...)
+	} else {
+		matchcount := 0
+		mismatchcount := 0
+		mismatchstart := -1
+		matching := true
+
+		addreset := func() {
+			if matching {
+				out = append(out, matchcount)
+				matchcount = 0
+			} else {
+				out = append(out, mismatchcount)
+				out = append(out, new_[mismatchstart:mismatchstart+mismatchcount]...)
+				mismatchstart = -1
+				mismatchcount = 0
+			}
+			matching = !matching
+		}
+
+		for i, oldval := range old {
+			newval := new_[i]
+			if oldval == newval { // matching
+				if !matching {
+					addreset()
+				}
+				matchcount++
+			} else { // mismatching
+				if matching {
+					addreset()
+					mismatchstart = i
+				}
+				mismatchcount++
+			}
+		}
+		addreset()
+	}
 	return out
 }
 
 // Method MarshalJSON creates json
-func (g *Game) MarshalJSON(old *Game) ([]byte, error) {
+func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 	citylist := make([]int, 0, len(g.Cities))
 	capitallist := make([]int, 0, len(g.Capitals))
 	for city, _ := range g.Cities {
@@ -219,15 +257,10 @@ func (g *Game) MarshalJSON(old *Game) ([]byte, error) {
 	sort.Ints(citylist)
 	sort.Ints(capitallist)
 
-	if old == nil {
-		old = &Game{
-			Terrain: nil,
-			Armies:  nil,
-		}
-	}
-	terraindiff := createDiff(old.Terrain, g.Terrain)
+	terraindiff := createDiff(oldterrain, g.Terrain)
+
 	armiesold := make([]int, 0)
-	for _, army := range old.Armies {
+	for _, army := range oldarmies {
 		armiesold = append(armiesold, int(army))
 	}
 	armiesnew := make([]int, 0)
@@ -235,6 +268,9 @@ func (g *Game) MarshalJSON(old *Game) ([]byte, error) {
 		armiesnew = append(armiesnew, int(army))
 	}
 	armiesdiff := createDiff(armiesold, armiesnew)
+
+	//	log.Println("terrain", terraindiff)
+	//	log.Println("armies", armiesdiff)
 
 	return json.Marshal(map[string]interface{}{
 		"terrain_diff": terraindiff,
