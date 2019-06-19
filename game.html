@@ -69,6 +69,10 @@ body {
 .city {
     background: url(/city.svg) hsl(var(--color), 75%, 65%);
 }
+.school {
+	color: hsl(var(--color), 55%, 35%);
+}
+
 .country {
 	color: hsl(var(--color), 75%, 65%);
 }
@@ -85,20 +89,26 @@ var map = {
 	terrain: [],
 	armies: [],
 	capitals: [],
-	cities: []
+	cities: [],
+	schools: null
 };
 var countries = [];
 var width, height;
 var gameId, countryIndex;
 
-function totalArmy(fCountryIndex) {
+function totalcount(fCountryIndex) {
 	var total = 0;
+	var totalsci = 0;
 	for (var i = 0; i < map.terrain.length; i++) {
 		if (map.terrain[i] == fCountryIndex) {
-			total += map.armies[i];
+			if (map.schools.has(i)) {
+				totalsci += map.armies[i];
+			} else {
+				total += map.armies[i];
+			}
 		}
 	}
-	return total;
+	return [total, totalsci];
 }
 
 function patch(old, diff) {
@@ -131,6 +141,7 @@ ws.onmessage = function(msg) {
 		document.getElementById("turn").innerHTML = data.turn;
 		map.cities = data.cities;
 		map.capitals = data.capitals;
+		map.schools = new Set(data.schools);
 		map.terrain = patch(map.terrain, data.terrain_diff);
 		map.armies = patch(map.armies, data.armies_diff);
 
@@ -143,6 +154,11 @@ ws.onmessage = function(msg) {
 				} else {
 					elem.innerHTML = map.armies[i];
 				}
+				if (map.schools.has(i)) {
+					elem.classList.add("school");
+				} else if (elem.classList.contains("school")) {
+					elem.classList.remove("school");
+				}
 			}
 		}
         for (var tile of map.capitals) {
@@ -152,6 +168,8 @@ ws.onmessage = function(msg) {
         for (var tile of map.cities) {
 			var elem = document.getElementById("tile-" + tile);
             elem.classList.add("city");
+			if (elem.classList.contains("capital"))
+				elem.classList.remove("capital");
         }
         if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
 			for (var capital of map.capitals) {
@@ -164,8 +182,9 @@ ws.onmessage = function(msg) {
 		}
 
 		for (var i = 0; i < countries.length; i++) {
-			var elem = document.getElementById("total-" + i);
-			elem.innerHTML = totalArmy(i);
+			var total = totalcount(i);
+			document.getElementById("total-" + i).innerHTML = total[0];
+			document.getElementById("scientists-" + i).innerHTML = total[1];
 		}
 	} else if (msg.data.startsWith("map ")) {
 		width = msg.data.split(" ")[1] | 0;
@@ -207,6 +226,10 @@ ws.onmessage = function(msg) {
 			celltotal.innerHTML = "0";
 			celltotal.classList.add("total");
 			celltotal.id = "total-" + i;
+
+			let cellsci = row.insertCell(2);
+			cellsci.innerHTML = "0";
+			cellsci.id = "scientists-" + i;
 		}
 	} else if (msg.data.startsWith("player_lose ")) {
 		for (var country of msg.data.split(" ").slice(1)) {
@@ -256,6 +279,9 @@ window.onkeydown = function(e) {
         if (e.key == "2") {
             ws.send("wall " + index);
         }
+		if (e.key == "3") {
+			ws.send("school " + index);
+		}
     }
 }
 		</script>

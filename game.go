@@ -25,6 +25,7 @@ type Game struct {
 	Armies   []uint       // army = [tileIndex]
 	Cities   map[int]bool // isCity = [tileIndex]
 	Capitals map[int]bool // isCaptial = [tileIndex]
+	Schools  map[int]bool
 
 	Losers map[int]bool // People who lost
 
@@ -41,6 +42,7 @@ func NewGame(countries []string, width int, height int) *Game {
 		Armies:    make([]uint, size),
 		Cities:    make(map[int]bool),
 		Capitals:  make(map[int]bool),
+		Schools:   make(map[int]bool),
 		Losers:    make(map[int]bool),
 		Turn:      0,
 		Width:     width,
@@ -99,6 +101,9 @@ outer:
 			}
 			continue
 		case TILE_SUBURB:
+			if g.Turn%2 == 0 && g.Schools[index] {
+				g.Armies[index] += 1
+			}
 			if g.Turn%20 == 0 && g.Turn != 0 {
 				g.Armies[index] += 1
 			}
@@ -134,6 +139,9 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 	}
 
 	if g.Terrain[toTileIndex] == countryIndex {
+		if g.Schools[toTileIndex] || g.Schools[fromTileIndex] {
+			return false
+		}
 		g.Armies[toTileIndex] += g.Armies[fromTileIndex] - 1
 		g.Terrain[toTileIndex] = countryIndex
 	} else {
@@ -150,6 +158,10 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 
 				delete(g.Capitals, toTileIndex)
 				g.Cities[toTileIndex] = true
+			}
+
+			if g.Schools[toTileIndex] {
+				delete(g.Schools, toTileIndex)
 			}
 
 			g.Terrain[toTileIndex] = countryIndex
@@ -175,7 +187,8 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 
 // Method MakeCity creates a city
 func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
-	if g.Terrain[tileIndex] != countryIndex || g.Armies[tileIndex] < 31 || g.Cities[tileIndex] {
+	if g.Terrain[tileIndex] != countryIndex || g.Armies[tileIndex] < 31 ||
+		g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] {
 		return false
 	}
 	for _, tile := range g.TilesAround(tileIndex, 4) {
@@ -194,13 +207,31 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	if g.Cities[tileIndex] || g.Capitals[tileIndex] {
+	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] {
 		return false
 	}
-	if g.Armies[tileIndex] < uint(g.Turn) * 5 {
+	if g.Armies[tileIndex] < uint(g.Turn)*5 {
 		g.Armies[tileIndex] = uint(g.Turn) * 5
 	}
 	g.Terrain[tileIndex] = TILE_WALL
+	return true
+}
+
+func (g *Game) MakeSchool(countryIndex int, tileIndex int) bool {
+	if g.Terrain[tileIndex] != countryIndex {
+		return false
+	}
+	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] {
+		return false
+	}
+	if g.TileType(tileIndex) != TILE_SUBURB {
+		return false
+	}
+	if g.Armies[tileIndex] <= 15 {
+		return false
+	}
+	g.Armies[tileIndex] = 0
+	g.Schools[tileIndex] = true
 	return true
 }
 
@@ -257,14 +288,19 @@ func createDiff(old []int, new_ []int) []int {
 func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 	citylist := make([]int, 0, len(g.Cities))
 	capitallist := make([]int, 0, len(g.Capitals))
+	schools := make([]int, 0, len(g.Schools))
 	for city, _ := range g.Cities {
 		citylist = append(citylist, city)
 	}
 	for capital, _ := range g.Capitals {
 		capitallist = append(capitallist, capital)
 	}
+	for school, _ := range g.Schools {
+		schools = append(schools, school)
+	}
 	sort.Ints(citylist)
 	sort.Ints(capitallist)
+	sort.Ints(schools)
 
 	terraindiff := createDiff(oldterrain, g.Terrain)
 
@@ -285,6 +321,7 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 		"terrain_diff": terraindiff,
 		"armies_diff":  armiesdiff,
 		"cities":       citylist,
+		"schools":      schools,
 		"capitals":     capitallist,
 		"turn":         g.Turn,
 	})

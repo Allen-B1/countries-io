@@ -6,8 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"strconv"
-	"time"
 	"sync"
+	"time"
 )
 
 var rooms = make(map[string]*Room)

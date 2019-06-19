@@ -36,9 +36,10 @@ func broadcastGame(gameId string, message string) {
 }
 
 type gameThread struct {
-	Attack   [](chan [2]int)
-	MakeCity [](chan int)
-	MakeWall [](chan int)
+	Attack     [](chan [2]int)
+	MakeCity   [](chan int)
+	MakeWall   [](chan int)
+	MakeSchool [](chan int)
 }
 
 var gameThreads = make(map[string]gameThread)
@@ -131,7 +132,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		case thread.Attack[info.Index] <- [2]int{fromTile, toTile}:
 		case <-time.After(500 * time.Millisecond):
 		}
-	case "city", "wall":
+	case "city", "wall", "school":
 		if len(args) != 2 {
 			return
 		}
@@ -149,6 +150,11 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			case thread.MakeWall[info.Index] <- tile:
 			case <-time.After(500 * time.Millisecond):
 			}
+		} else if args[0] == "school" {
+			select {
+			case thread.MakeSchool[info.Index] <- tile:
+			case <-time.After(500 * time.Millisecond):
+			}
 		}
 	}
 }
@@ -159,6 +165,7 @@ func startGameThread(gameId string, game *Game) {
 		thread.Attack = append(thread.Attack, make(chan [2]int))
 		thread.MakeCity = append(thread.MakeCity, make(chan int))
 		thread.MakeWall = append(thread.MakeWall, make(chan int))
+		thread.MakeSchool = append(thread.MakeSchool, make(chan int))
 	}
 
 	gameThreads[gameId] = thread
@@ -235,6 +242,14 @@ func startGameThread(gameId string, game *Game) {
 			select {
 			case data := <-channel:
 				game.MakeCity(countryIndex, data)
+			default:
+			}
+		}
+
+		for countryIndex, channel := range thread.MakeSchool {
+			select {
+			case data := <-channel:
+				game.MakeSchool(countryIndex, data)
 			default:
 			}
 		}
