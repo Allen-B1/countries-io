@@ -109,6 +109,7 @@ func roomThread(roomId string, room *Room) {
 	for {
 		time.Sleep(1 * time.Second)
 		if room.StartTime != nil && time.Now().After(*room.StartTime) {
+			log.Println("Starting...")
 			startGame(roomId, room)
 		}
 	}

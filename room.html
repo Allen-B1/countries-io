@@ -98,6 +98,10 @@ ws.onopen = function() {
 	ws.send("join " + location.pathname.slice(1) + " " + countryName);
 	document.getElementById("country").innerText = countryName.replace(/_/g, " ");
 }
+ws.onclose = function () {
+	document.getElementById("error").innerHTML = "Disconnected";
+	document.getElementById("error-container").style.display = "block";
+}
 		</script>
 	</body>
 </html>

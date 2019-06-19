@@ -14,6 +14,7 @@ button, .button {
 	text-decoration: none;
 	display: inline-block;
 	font-size: 14px;
+	outline: none;
 }
 button:active, .button:active, button:focus, .button:focus {
 	border: 4px solid hsl(100, 75%, 55%);
@@ -33,6 +34,7 @@ input {
 	border-bottom: 2px solid hsl(0, 0%, 65%);
 	background: transparent;
 	padding: 8px;
+	outline: none;
 }
 
 input:invalid {
