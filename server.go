@@ -85,14 +85,18 @@ func main() {
 	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			w.Header().Set("Location", "/")
+			w.WriteHeader(302)
+			return
+		}
 		http.ServeFile(w, r, "index.html")
 	})
 	http.HandleFunc("/ffa", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/ffa" {
-			http.ServeFile(w, r, "room.html")
-		} else {
-			w.WriteHeader(404)
-		}
+		http.ServeFile(w, r, "room.html")
+	})
+	http.HandleFunc("/1v1", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "room.html")
 	})
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "game.html")

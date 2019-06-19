@@ -88,13 +88,16 @@ ws.onmessage = function(msg) {
 		}
 
 		if (command === "error") {
-			console.error(msg.data.slice(6));
 			document.getElementById("error").innerHTML = msg.data.slice(6);
 			document.getElementById("error-container").style.display = "block";
 		}
 	}
 }
 ws.onopen = function() {
+	if (!location.search.startsWith("?country=")) {
+		document.getElementById("error").innerHTML = "country name required"
+		document.getElementById("error-container").style.display = "block";
+	}
 	var countryName = location.search.slice(9).replace(/\+/g, " ").replace(/\s+/g, "_");
 	ws.send("join " + location.pathname.slice(1) + " " + countryName);
 	document.getElementById("country").innerText = countryName.replace(/_/g, " ");
@@ -102,6 +105,9 @@ ws.onopen = function() {
 	setInterval(function () {
 		ws.send("ping");
 	}, 5000);
+}
+window.onbeforeunload = function() {
+	ws.onclose = null;
 }
 ws.onclose = function () {
 	document.getElementById("error").innerHTML = "Disconnected";
