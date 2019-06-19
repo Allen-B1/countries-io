@@ -75,6 +75,7 @@ ws.onmessage = function(msg) {
 			playermax = msg.data.split(" ")[1] | 0;
 		}
 		if (command === "start") {
+			ws.onclose = null;
 			location.href = "/play#" + msg.data.split(" ")[1] + ":" + msg.data.split(" ")[2];
 		}
 		if (command == "time") {
