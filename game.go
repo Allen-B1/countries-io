@@ -26,6 +26,7 @@ type Game struct {
 	Cities   map[int]bool // isCity = [tileIndex]
 	Capitals map[int]bool // isCaptial = [tileIndex]
 	Schools  map[int]bool
+	Portals map[int]bool
 
 	Losers map[int]bool // People who lost
 
@@ -43,6 +44,7 @@ func NewGame(countries []string, width int, height int) *Game {
 		Cities:    make(map[int]bool),
 		Capitals:  make(map[int]bool),
 		Schools:   make(map[int]bool),
+		Portals:    make(map[int]bool),
 		Losers:    make(map[int]bool),
 		Turn:      0,
 		Width:     width,
@@ -134,7 +136,8 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 	toRow := toTileIndex / g.Width
 	fromCol := fromTileIndex % g.Width
 	toCol := toTileIndex % g.Width
-	if fromRow != toRow && fromCol != toCol { // TODO: Expand
+	if (fromRow != toRow && fromCol != toCol) &&
+		!(g.Portals[fromTileIndex] && g.Terrain[toTileIndex] == countryIndex) { // TODO: Expand
 		return false
 	}
 
@@ -188,7 +191,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 // Method MakeCity creates a city
 func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex || g.Armies[tileIndex] < 31 ||
-		g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] {
+		g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
 		return false
 	}
 	for _, tile := range g.TilesAround(tileIndex, 4) {
@@ -210,7 +213,7 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] {
+	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
 		return false
 	}
 	if g.Armies[tileIndex] < uint(g.Turn)*5 {
@@ -224,7 +227,7 @@ func (g *Game) MakeSchool(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] {
+	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
 		return false
 	}
 	if g.TileType(tileIndex) != TILE_SUBURB {
@@ -235,6 +238,27 @@ func (g *Game) MakeSchool(countryIndex int, tileIndex int) bool {
 	}
 	g.Armies[tileIndex] = 0
 	g.Schools[tileIndex] = true
+	return true
+}
+
+func (g *Game) MakePortal(countryIndex int, tileIndex int) bool {
+	if g.Scientists(countryIndex) < 1000 {
+		return false
+	}
+	if g.Terrain[tileIndex] != countryIndex {
+		return false
+	}
+	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
+		return false
+	}
+	if g.TileType(tileIndex) != TILE_SUBURB {
+		return false
+	}
+	if g.Armies[tileIndex] <= 200 {
+		return false
+	}
+	g.Portals[tileIndex] = true
+	g.Armies[tileIndex] -= 200
 	return true
 }
 
@@ -292,6 +316,7 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 	citylist := make([]int, 0, len(g.Cities))
 	capitallist := make([]int, 0, len(g.Capitals))
 	schools := make([]int, 0, len(g.Schools))
+	portals := make([]int, 0, len(g.Portals))
 	for city, _ := range g.Cities {
 		citylist = append(citylist, city)
 	}
@@ -301,9 +326,13 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 	for school, _ := range g.Schools {
 		schools = append(schools, school)
 	}
+	for portal, _ := range g.Portals {
+		portals = append(portals, portal)
+	}
 	sort.Ints(citylist)
 	sort.Ints(capitallist)
 	sort.Ints(schools)
+	sort.Ints(portals)
 
 	terraindiff := createDiff(oldterrain, g.Terrain)
 
@@ -325,6 +354,7 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 		"armies_diff":  armiesdiff,
 		"cities":       citylist,
 		"schools":      schools,
+		"portals": portals,
 		"capitals":     capitallist,
 		"turn":         g.Turn,
 	})

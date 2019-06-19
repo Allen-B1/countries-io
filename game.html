@@ -69,9 +69,13 @@ body {
 .city {
     background: url(/city.svg) hsl(var(--color), 75%, 65%);
 }
+.portal {
+    background: url(/portal.svg) hsl(var(--color), 75%, 65%);
+}
 .school {
 	color: hsl(var(--color), 55%, 35%);
 }
+
 
 .country {
 	color: hsl(var(--color), 75%, 65%);
@@ -90,7 +94,8 @@ var map = {
 	armies: [],
 	capitals: [],
 	cities: [],
-	schools: null
+	schools: null,
+	portals: [],
 };
 var countries = [];
 var width, height;
@@ -142,6 +147,7 @@ ws.onmessage = function(msg) {
 		map.cities = data.cities;
 		map.capitals = data.capitals;
 		map.schools = new Set(data.schools);
+		map.portals = data.portals;
 		map.terrain = patch(map.terrain, data.terrain_diff);
 		map.armies = patch(map.armies, data.armies_diff);
 
@@ -170,6 +176,10 @@ ws.onmessage = function(msg) {
             elem.classList.add("city");
 			if (elem.classList.contains("capital"))
 				elem.classList.remove("capital");
+        }
+        for (var tile of map.portals) {
+			var elem = document.getElementById("tile-" + tile);
+            elem.classList.add("portal");
         }
         if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
 			for (var capital of map.capitals) {
@@ -281,6 +291,9 @@ window.onkeydown = function(e) {
 		}
 		if (e.key == "3") {
 			ws.send("wall " + index);
+		}
+		if (e.key == "4") {
+			ws.send("portal " + index);
 		}
     }
 }
