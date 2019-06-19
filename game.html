@@ -226,7 +226,7 @@ window.onkeydown = function(e) {
 	if (document.activeElement.id && document.activeElement.id.startsWith("tile-")){
 		var index = document.activeElement.id.slice(5) | 0;
         if (e.code == "KeyW" || e.code == "KeyA" || e.code == "KeyS" || e.code == "KeyD") {
-			if (!canAttack || map.terrain[index] != countryIndex) return;
+			if (!canAttack || (map.terrain[index] != countryIndex && map.terrain[index] != -2)) return;
             var endIndex;
             switch (e.code) {
             case "KeyA":
@@ -243,8 +243,10 @@ window.onkeydown = function(e) {
                 break;
             default: return;
             }
-            ws.send("attack " + index + " " + endIndex);
-			canAttack = false;
+			if (map.terrain[index] !== -2) {
+		        ws.send("attack " + index + " " + endIndex);
+				canAttack = false;
+			}
             var endtile = document.getElementById("tile-" + endIndex);
             if (endtile != null) endtile.focus();
     	}
