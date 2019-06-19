@@ -28,6 +28,7 @@
 	color: #000;
 	font-size: 14px;
 }
+
 #turn-container {
 	left: 16px; right: auto;
 	padding: 8px 12px;
@@ -77,16 +78,50 @@ body {
     background: url(/school.svg) hsl(var(--color), 75%, 65%);
 }
 
-
 .country {
 	color: hsl(var(--color), 75%, 65%);
 }
+
+.instruction {
+	background: rgba(250,250,250,0.8);
+	padding: 8px 12px;
+
+	display: inline-block;
+}
+#instructions {
+	font-size: 14px;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	position: fixed;
+	top: 16px;
+	left: 50%;
+	width: 400px;
+	margin-left: -200px;
+}
+* + .instruction {
+	margin-left: 8px;
+}
+.instruction .key {
+	display: inline-block;
+	font-family: monospace;
+}
+.instruction .key::after {
+	content: ":";
+}
+#wall, #portal { display: none; }
 	</style>
 	</head>
 	<body>
 		<audio src="/sound.wav" autoplay></audio>
 		<div id="error"></div>
 		<div id="turn-container">Turn <span id="turn">0</span></div>
+		<div id="instructions">
+			<div class="instruction"><span class="key">1</span> City</div>
+			<div class="instruction"><span class="key">2</span> School</div>
+			<div class="instruction" id="wall"><span class="key">3</span> Wall</div>
+			<div class="instruction" id="portal"><span class="key">4</span> Portal</div>
+		</div>
 		<table id="countries"></table>
 		<table id="map"></table>
 		<script>
@@ -212,6 +247,13 @@ ws.onmessage = function(msg) {
 			var total = totalcount(i);
 			document.getElementById("total-" + i).innerHTML = total[0];
 			document.getElementById("scientists-" + i).innerHTML = total[1];
+
+			if (total[1] >= 100) {
+				document.getElementById("wall").style.display = "block";
+			}
+			if (total[1] >= 1000) {
+				document.getElementById("portal").style.display = "block";
+			}
 		}
 	} else if (msg.data.startsWith("map ")) {
 		width = msg.data.split(" ")[1] | 0;
