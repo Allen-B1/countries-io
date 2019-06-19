@@ -28,6 +28,9 @@ func main() {
 	http.HandleFunc("/capital.svg", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "capital.svg")
 	})
+	http.HandleFunc("/school.svg", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "school.svg")
+	})
 	http.HandleFunc("/portal.svg", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "portal.svg")
 	})

@@ -26,7 +26,7 @@ type Game struct {
 	Cities   map[int]bool // isCity = [tileIndex]
 	Capitals map[int]bool // isCaptial = [tileIndex]
 	Schools  map[int]bool
-	Portals map[int]bool
+	Portals  map[int]bool
 
 	Losers map[int]bool // People who lost
 
@@ -44,7 +44,7 @@ func NewGame(countries []string, width int, height int) *Game {
 		Cities:    make(map[int]bool),
 		Capitals:  make(map[int]bool),
 		Schools:   make(map[int]bool),
-		Portals:    make(map[int]bool),
+		Portals:   make(map[int]bool),
 		Losers:    make(map[int]bool),
 		Turn:      0,
 		Width:     width,
@@ -354,7 +354,7 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 		"armies_diff":  armiesdiff,
 		"cities":       citylist,
 		"schools":      schools,
-		"portals": portals,
+		"portals":      portals,
 		"capitals":     capitallist,
 		"turn":         g.Turn,
 	})
