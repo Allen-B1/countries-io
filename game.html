@@ -137,6 +137,22 @@ var capitalSelected = false;
 var canAttack = false;
 
 var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/game");
+
+var lastActive = null;
+function clickHandler(e) {	
+	console.log(e.shiftKey, e.altKey, lastActive);
+	if (e.altKey) {
+		if (lastActive != null) {
+			ws.send("attack " + lastActive + " " + this.id.slice(5));
+		}
+	}
+	if (map.terrain[this.id.slice(5)] === countryIndex) {
+		lastActive = this.id.slice(5);
+		this.focus();
+	} else
+		this.blur();
+}
+
 ws.onmessage = function(msg) {
 	console.log("ws: " + msg.data);
 
@@ -208,12 +224,7 @@ ws.onmessage = function(msg) {
 				cell.id = "tile-" + (i * width + j);
 				cell.classList.add("tile");
 				cell.setAttribute("tabindex", "-1");
-				cell.addEventListener("click", function(e) {
-					if (map.terrain[this.id.slice(5)] === countryIndex)
-						this.focus();
-					else
-						this.blur();
-				});
+				cell.addEventListener("click", clickHandler);
 			}
 		}
 		maptable.style.width = (32 * width) + "px";
