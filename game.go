@@ -204,6 +204,9 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 }
 
 func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
+	if g.Scientists(countryIndex) < 100 {
+		return false
+	}
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
@@ -415,4 +418,14 @@ func (g *Game) checkLoss(countryIndex int) {
 		}
 	}
 	g.Losers[countryIndex] = true
+}
+
+func (g *Game) Scientists(countryIndex int) uint {
+	out := uint(0)
+	for tile, terrain := range g.Terrain {
+		if terrain == countryIndex && g.Schools[tile] {
+			out += g.Armies[tile]
+		}
+	}
+	return out
 }
