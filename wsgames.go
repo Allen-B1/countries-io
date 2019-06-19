@@ -90,6 +90,15 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 
 		game := games[gameId]
 
+		if index < 0 {
+			data, err := game.MarshalJSON(nil, nil)
+			if err != nil {
+				log.Println(err)
+			} else {
+				conn.WriteMessage(websocket.TextMessage, []byte("update "+string(data)))
+			}
+		}
+
 		conn.WriteMessage(websocket.TextMessage, []byte("player_list "+strings.Join(game.Countries, " ")))
 		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("map %d %d", game.Width, game.Height)))
 		return
@@ -182,7 +191,7 @@ func startGameThread(gameId string, game *Game) {
 		n := 0
 		gameConns.Lock()
 		for _, info := range gameConns.Map {
-			if info.Game == gameId {
+			if info.Game == gameId && info.Index >= 0 {
 				n++
 			}
 		}
