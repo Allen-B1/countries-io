@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -90,5 +91,11 @@ func main() {
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "game.html")
 	})
-	http.ListenAndServe(":8080", nil)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	http.ListenAndServe(":"+port, nil)
 }
