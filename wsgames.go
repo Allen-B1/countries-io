@@ -36,7 +36,7 @@ func broadcastGame(gameId string, message string) {
 }
 
 type gameThread struct {
-	Attack [](chan [2]int)
+	Attack   [](chan [2]int)
 	MakeCity [](chan int)
 	MakeWall [](chan int)
 }
@@ -158,7 +158,7 @@ func startGameThread(gameId string, game *Game) {
 	for _, _ = range game.Countries {
 		thread.Attack = append(thread.Attack, make(chan [2]int))
 		thread.MakeCity = append(thread.MakeCity, make(chan int))
-		thread.MakeWall = append(thread.MakeWall, make(chan int))		
+		thread.MakeWall = append(thread.MakeWall, make(chan int))
 	}
 
 	gameThreads[gameId] = thread
@@ -249,4 +249,3 @@ func startGameThread(gameId string, game *Game) {
 		}
 	}
 }
-

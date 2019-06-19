@@ -277,7 +277,7 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 		"armies_diff":  armiesdiff,
 		"cities":       citylist,
 		"capitals":     capitallist,
-		"turn": g.Turn,
+		"turn":         g.Turn,
 	})
 }
 
