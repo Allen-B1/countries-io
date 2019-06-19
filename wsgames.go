@@ -189,6 +189,14 @@ func startGameThread(gameId string, game *Game) {
 		} else {
 			copy(oldarmies, game.Armies)
 		}
+
+		// if only one person left stop
+		if len(game.Countries)-len(game.Losers) <= 1 {
+			delete(games, gameId)
+			delete(gameThreads, gameId)
+			return
+		}
+
 		time.Sleep(dur)
 		turn = !turn
 		if turn {
@@ -211,13 +219,6 @@ func startGameThread(gameId string, game *Game) {
 			}
 
 			broadcastGame(gameId, "player_lose"+(loserstr))
-		}
-
-		// if only one person left stop
-		if len(game.Countries)-len(game.Losers) <= 1 {
-			delete(games, gameId)
-			delete(gameThreads, gameId)
-			return
 		}
 	}
 }
