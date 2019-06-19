@@ -68,6 +68,9 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 		}
 		return
 	}
+	if mt == websocket.TextMessage && len(args) >= 1 && args[0] == "ping" {
+		conn.WriteMessage(websocket.TextMessage, []byte("pong"))
+	}
 	if mt == websocket.TextMessage && len(args) >= 3 && args[0] == "join" {
 		if _, ok := roomConns.Map[conn]; ok {
 			conn.WriteMessage(websocket.TextMessage, []byte("error join error: already in a game"))

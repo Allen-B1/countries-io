@@ -57,7 +57,7 @@ setInterval(updateTime, 1000);
 
 var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/room");
 ws.onmessage = function(msg) {
-	console.log(msg.data);
+	console.log("ws: " + msg.data);
 	if (typeof msg.data === "string") {
 		var command = msg.data.split(" ")[0];
 		if (command.startsWith("player")) {
@@ -97,6 +97,10 @@ ws.onopen = function() {
 	var countryName = location.search.slice(9).replace(/\+/g, " ").replace(/\s+/g, "_");
 	ws.send("join " + location.pathname.slice(1) + " " + countryName);
 	document.getElementById("country").innerText = countryName.replace(/_/g, " ");
+
+	setInterval(function () {
+		ws.send("ping");
+	}, 5000);
 }
 ws.onclose = function () {
 	document.getElementById("error").innerHTML = "Disconnected";

@@ -49,6 +49,9 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 	if mt != websocket.CloseMessage && len(args) == 0 {
 		return
 	}
+	if len(args) < 1 {
+		return
+	}
 	if mt == websocket.TextMessage && args[0] == "join" {
 		gameConns.Lock()
 		_, ok := gameConns.Map[conn]
