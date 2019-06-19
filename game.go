@@ -254,11 +254,11 @@ func (g *Game) MakePortal(countryIndex int, tileIndex int) bool {
 	if g.TileType(tileIndex) != TILE_SUBURB {
 		return false
 	}
-	if g.Armies[tileIndex] <= 200 {
+	if g.Armies[tileIndex] <= 100 {
 		return false
 	}
 	g.Portals[tileIndex] = true
-	g.Armies[tileIndex] -= 200
+	g.Armies[tileIndex] -= 100
 	return true
 }
 
