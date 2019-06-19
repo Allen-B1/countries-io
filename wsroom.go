@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+	"sync"
 )
 
 var rooms = make(map[string]*Room)
@@ -28,10 +29,15 @@ type roomConnInfo struct {
 	Country string
 }
 
-var roomConns = make(map[*websocket.Conn]roomConnInfo)
+var roomConns = struct {
+	Map map[*websocket.Conn]roomConnInfo
+	sync.Mutex
+}{
+	Map: make(map[*websocket.Conn]roomConnInfo),
+}
 
 func broadcastRoom(roomId string, message string) {
-	for conn, info := range roomConns {
+	for conn, info := range roomConns.Map {
 		if roomId == info.Room {
 			conn.WriteMessage(websocket.TextMessage, []byte(message))
 		}
@@ -39,8 +45,10 @@ func broadcastRoom(roomId string, message string) {
 }
 
 func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
+	roomConns.Lock()
+	defer roomConns.Unlock()
 	if mt == websocket.CloseMessage {
-		info, ok := roomConns[conn]
+		info, ok := roomConns.Map[conn]
 		if !ok {
 			return
 		}
@@ -49,7 +57,8 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 		room := rooms[roomId]
 		if room != nil {
 			room.Remove(country)
-			delete(roomConns, conn)
+
+			delete(roomConns.Map, conn)
 			broadcastRoom(roomId, "player_remove")
 
 			log.Println("leave " + roomId + " " + country)
@@ -60,7 +69,7 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 		return
 	}
 	if mt == websocket.TextMessage && len(args) >= 3 && args[0] == "join" {
-		if _, ok := roomConns[conn]; ok {
+		if _, ok := roomConns.Map[conn]; ok {
 			conn.WriteMessage(websocket.TextMessage, []byte("error join error: already in a game"))
 			return
 		}
@@ -72,7 +81,7 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 			return
 		}
 
-		roomConns[conn] = roomConnInfo{
+		roomConns.Map[conn] = roomConnInfo{
 			Room:    args[1],
 			Country: args[2],
 		}
@@ -111,7 +120,7 @@ func startGame(roomId string, room *Room) {
 	gameId := strconv.FormatInt(rand.Int63(), 36)
 	games[gameId] = game
 
-	for conn, info := range roomConns {
+	for conn, info := range roomConns.Map {
 		if roomId == info.Room {
 			index := -1
 			for i, country := range game.Countries {

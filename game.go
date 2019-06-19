@@ -154,7 +154,11 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 
 			g.Terrain[toTileIndex] = countryIndex
 		} else if g.Armies[fromTileIndex]-1 < g.Armies[toTileIndex] { // lose
-			g.Armies[toTileIndex] -= g.Armies[fromTileIndex] - 1
+			if g.Terrain[toTileIndex] == TILE_WALL {
+				g.Armies[toTileIndex] += g.Armies[fromTileIndex] - 1
+			} else {
+				g.Armies[toTileIndex] -= g.Armies[fromTileIndex] - 1
+			}
 		} else if g.Armies[fromTileIndex]-1 == g.Armies[toTileIndex] { // tie
 			g.Armies[toTileIndex] = 0
 			g.Terrain[toTileIndex] = TILE_EMPTY
@@ -190,7 +194,12 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	g.Armies[tileIndex] *= 5
+	if g.Cities[tileIndex] || g.Capitals[tileIndex] {
+		return false
+	}
+	if g.Armies[tileIndex] < uint(g.Turn) * 5 {
+		g.Armies[tileIndex] = uint(g.Turn) * 5
+	}
 	g.Terrain[tileIndex] = TILE_WALL
 	return true
 }
