@@ -266,6 +266,10 @@ ws.onmessage = function(msg) {
 		}
 		maptable.style.width = (32 * width) + "px";
 		maptable.style.height = (32 * height) + "px";
+
+		window.onbeforeunload = function() {
+			return "You won't be able to reconnect";
+		};
 	} else if (msg.data.startsWith("player_list ")) {
 		countries = msg.data.split(" ").slice(1);
 		var table = document.getElementById("countries");
@@ -294,6 +298,9 @@ ws.onmessage = function(msg) {
 			var elem = document.getElementById("country-" + country);
 			if (elem !== null)
 				elem.style.setProperty("text-decoration", "line-through");
+			if (country == countryIndex) {
+				window.onbeforeunload = null;
+			}
 		}
 	}
 }
