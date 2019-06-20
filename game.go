@@ -123,9 +123,6 @@ outer:
 
 // Method Attack causes a country to move armies
 func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool {
-	// TODO: Make legit
-	// * Check if tiles are next to each other
-	// * Capturing cities/capitals = gaining 3x3/5x5 square
 	if g.Terrain[fromTileIndex] != countryIndex ||
 		g.Armies[fromTileIndex] < 2 ||
 		toTileIndex >= len(g.Terrain) || toTileIndex < 0 {
@@ -145,16 +142,19 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 		return false
 	}
 
+	var targetArmy = g.Armies[fromTileIndex] - 1
+	var remainingArmy = uint(1)
+
 	if g.Terrain[toTileIndex] == countryIndex {
 		if g.Schools[toTileIndex] || g.Schools[fromTileIndex] {
 			return false
 		}
-		g.Armies[toTileIndex] += g.Armies[fromTileIndex] - 1
+		g.Armies[toTileIndex] += targetArmy
 		g.Terrain[toTileIndex] = countryIndex
 	} else {
 		toCountry := g.Terrain[toTileIndex]
-		if g.Armies[fromTileIndex]-1 > g.Armies[toTileIndex] { // win
-			g.Armies[toTileIndex] = g.Armies[fromTileIndex] - 1 - g.Armies[toTileIndex]
+		if targetArmy > g.Armies[toTileIndex] { // win
+			g.Armies[toTileIndex] = targetArmy - g.Armies[toTileIndex]
 
 			if g.Cities[toTileIndex] {
 				g.ConvertAround(toTileIndex, 1, countryIndex, g.Terrain[toTileIndex])
@@ -172,13 +172,13 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 			}
 
 			g.Terrain[toTileIndex] = countryIndex
-		} else if g.Armies[fromTileIndex]-1 < g.Armies[toTileIndex] { // lose
+		} else if targetArmy < g.Armies[toTileIndex] { // lose
 			if g.Terrain[toTileIndex] == TILE_WALL {
-				g.Armies[toTileIndex] += g.Armies[fromTileIndex] - 1
+				g.Armies[toTileIndex] += targetArmy
 			} else {
-				g.Armies[toTileIndex] -= g.Armies[fromTileIndex] - 1
+				g.Armies[toTileIndex] -= targetArmy
 			}
-		} else if g.Armies[fromTileIndex]-1 == g.Armies[toTileIndex] { // tie
+		} else if targetArmy == g.Armies[toTileIndex] { // tie
 			g.Armies[toTileIndex] = 0
 			g.Terrain[toTileIndex] = TILE_EMPTY
 		}
@@ -188,7 +188,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 		}
 	}
 
-	g.Armies[fromTileIndex] = 1
+	g.Armies[fromTileIndex] = remainingArmy
 	return true
 }
 
