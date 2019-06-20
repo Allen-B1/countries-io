@@ -60,6 +60,8 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			return
 		}
 		gameId := args[1]
+
+		gameConns.Lock()
 		// Check if game exists
 		if _, ok := games[gameId]; !ok {
 			conn.WriteMessage(websocket.TextMessage, []byte("error game doesn't exist"))
@@ -71,6 +73,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			conn.WriteMessage(websocket.TextMessage, []byte("error "+err.Error()))
 			return
 		}
+		gameConns.Unlock()
 
 		if index >= 0 {
 			gameConns.Lock()
@@ -86,7 +89,6 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 
 		gameConns.Lock()
 		gameConns.Map[conn] = gameConnInfo{Game: gameId, Index: index}
-		gameConns.Unlock()
 
 		game := games[gameId]
 
@@ -98,6 +100,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 				conn.WriteMessage(websocket.TextMessage, []byte("update "+string(data)))
 			}
 		}
+		gameConns.Unlock()
 
 		conn.WriteMessage(websocket.TextMessage, []byte("player_list "+strings.Join(game.Countries, " ")))
 		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("map %d %d", game.Width, game.Height)))
