@@ -117,8 +117,8 @@ body {
 		<div id="error"></div>
 		<div id="turn-container">Turn <span id="turn">0</span></div>
 		<div id="instructions">
-			<div class="instruction"><span class="key">1</span> City</div>
-			<div class="instruction"><span class="key">2</span> School</div>
+			<div class="instruction" id="city"><span class="key">1</span> City</div>
+			<div class="instruction" id="school"><span class="key">2</span> School</div>
 			<div class="instruction" id="wall"><span class="key">3</span> Wall</div>
 			<div class="instruction" id="portal"><span class="key">4</span> Portal</div>
 		</div>
@@ -267,9 +267,10 @@ ws.onmessage = function(msg) {
 		maptable.style.width = (32 * width) + "px";
 		maptable.style.height = (32 * height) + "px";
 
-		window.onbeforeunload = function() {
-			return "You won't be able to reconnect";
-		};
+		if (countryIndex >= 0)
+			window.onbeforeunload = function() {
+				return "You won't be able to reconnect";
+			};
 	} else if (msg.data.startsWith("player_list ")) {
 		countries = msg.data.split(" ").slice(1);
 		var table = document.getElementById("countries");
@@ -306,8 +307,14 @@ ws.onmessage = function(msg) {
 }
 ws.onopen = function() {
 	var arr = location.hash.slice(1).split(":");
-	gameId = arr[0], countryIndex = arr[1] | 0;
+	gameId = arr[0]; countryIndex = arr[1] | 0;
 	ws.send("join " + gameId + " " + countryIndex);
+
+	for (var tiletype of ["city", "school", "wall", "portal"]) {
+		if (countryIndex < 0) {
+			document.getElementById(tiletype).style.display = "none";
+		}
+	}
 }
 
 window.onkeydown = function(e) {
