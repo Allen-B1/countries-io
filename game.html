@@ -161,8 +161,8 @@ var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + 
 
 var lastActive = null;
 function clickHandler(e) {	
-	console.log(e.shiftKey, e.altKey, lastActive);
-	if (e.altKey) {
+	e.preventDefault();
+	if (e.shiftKey) {
 		if (lastActive != null) {
 			ws.send("attack " + lastActive + " " + this.id.slice(5));
 		}
@@ -240,7 +240,7 @@ ws.onmessage = function(msg) {
 			document.getElementById("scientists-" + i).innerHTML = scientists;
 
 			if (i === countryIndex) {
-				if (scientists >= 100) {
+				if (scientists >= 15) {
 					document.getElementById("wall").style.display = "block";
 				}
 				if (scientists >= 1000) {

@@ -207,7 +207,7 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 }
 
 func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
-	if g.Scientists(countryIndex) < 100 {
+	if g.Scientists(countryIndex) < 15 {
 		return false
 	}
 	if g.Terrain[tileIndex] != countryIndex {
@@ -216,8 +216,8 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
 		return false
 	}
-	if g.Armies[tileIndex] < uint(g.Turn)*5 {
-		g.Armies[tileIndex] = uint(g.Turn) * 5
+	if g.Armies[tileIndex] < 500 {
+		g.Armies[tileIndex] = 500
 	}
 	g.Terrain[tileIndex] = TILE_WALL
 	return true
