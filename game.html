@@ -278,7 +278,7 @@ ws.onmessage = function(msg) {
 			row.setAttribute("data-index", i);
 			row.id = "country-" + i;
 			let cellname = row.insertCell(0);
-			cellname.innerText = countries[i].replace(/_/g, " ");
+			cellname.innerText = decodeURIComponent(countries[i]).replace(/_/g, " ");
 			cellname.classList.add("country");
 			if (i == countryIndex) {
 				row.style.fontWeight = "bold";
