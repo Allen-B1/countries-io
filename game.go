@@ -132,12 +132,16 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 		return false
 	}
 
+	if fromTileIndex == toTileIndex {
+		return true
+	}
+
 	fromRow := fromTileIndex / g.Width
 	toRow := toTileIndex / g.Width
 	fromCol := fromTileIndex % g.Width
 	toCol := toTileIndex % g.Width
-	if (fromRow != toRow && fromCol != toCol) &&
-		!(g.Portals[fromTileIndex] && g.Terrain[toTileIndex] == countryIndex) { // TODO: Expand
+	if !((fromRow == toRow && (fromCol-toCol == 1 || fromCol-toCol == -1)) || (fromCol == toCol && (fromRow-toRow == 1 || fromRow-toRow == -1))) &&
+		!(g.Portals[fromTileIndex] && g.Terrain[toTileIndex] == countryIndex) {
 		return false
 	}
 
