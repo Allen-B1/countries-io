@@ -369,8 +369,8 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 		"portals":      portals,
 		"capitals":     capitallist,
 		"turn":         g.Turn,
-		"soldiers": soldiers,
-		"scientists": scientists,
+		"soldiers":     soldiers,
+		"scientists":   scientists,
 	})
 }
 
@@ -473,4 +473,3 @@ func (g *Game) Scientists(countryIndex int) uint {
 	}
 	return out
 }
-
