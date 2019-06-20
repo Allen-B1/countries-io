@@ -349,6 +349,18 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 	//	log.Println("terrain", terraindiff)
 	//	log.Println("armies", armiesdiff)
 
+	scientists := make([]uint, len(g.Countries))
+	soldiers := make([]uint, len(g.Countries))
+	for tile, terrain := range g.Terrain {
+		if terrain >= 0 {
+			if g.Schools[tile] {
+				scientists[terrain] += g.Armies[tile]
+			} else {
+				soldiers[terrain] += g.Armies[tile]
+			}
+		}
+	}
+
 	return json.Marshal(map[string]interface{}{
 		"terrain_diff": terraindiff,
 		"armies_diff":  armiesdiff,
@@ -357,6 +369,8 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 		"portals":      portals,
 		"capitals":     capitallist,
 		"turn":         g.Turn,
+		"soldiers": soldiers,
+		"scientists": scientists,
 	})
 }
 
@@ -459,3 +473,4 @@ func (g *Game) Scientists(countryIndex int) uint {
 	}
 	return out
 }
+

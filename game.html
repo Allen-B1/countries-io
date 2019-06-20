@@ -137,21 +137,6 @@ var countries = [];
 var width, height;
 var gameId, countryIndex;
 
-function totalcount(fCountryIndex) {
-	var total = 0;
-	var totalsci = 0;
-	for (var i = 0; i < map.terrain.length; i++) {
-		if (map.terrain[i] == fCountryIndex) {
-			if (map.schools.has(i)) {
-				totalsci += map.armies[i];
-			} else {
-				total += map.armies[i];
-			}
-		}
-	}
-	return [total, totalsci];
-}
-
 function patch(old, diff) {
 	var out = [];
 	var i = 0;
@@ -189,8 +174,10 @@ function clickHandler(e) {
 		this.blur();
 }
 
+var firstupdate = true;
 ws.onmessage = function(msg) {
-	console.log("ws: " + msg.data);
+	if (!msg.data.startsWith("update ")) console.log("ws: " + msg.data);
+	else console.log("update");
 
 	if (msg.data.startsWith("update ")) {
 		canAttack = true;
@@ -219,10 +206,12 @@ ws.onmessage = function(msg) {
 				}
 			}
 		}
-        for (var tile of map.capitals) {
-			var elem = document.getElementById("tile-" + tile);
-            elem.classList.add("capital");
-        }
+		if (firstupdate) {
+	        for (var tile of map.capitals) {
+				var elem = document.getElementById("tile-" + tile);
+    	        elem.classList.add("capital");
+    	    }
+		}
         for (var tile of map.cities) {
 			var elem = document.getElementById("tile-" + tile);
             elem.classList.add("city");
@@ -233,6 +222,7 @@ ws.onmessage = function(msg) {
 			var elem = document.getElementById("tile-" + tile);
             elem.classList.add("portal");
         }
+
         if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
 			for (var capital of map.capitals) {
 				if (map.terrain[capital] == countryIndex) {
@@ -244,17 +234,21 @@ ws.onmessage = function(msg) {
 		}
 
 		for (var i = 0; i < countries.length; i++) {
-			var total = totalcount(i);
-			document.getElementById("total-" + i).innerHTML = total[0];
-			document.getElementById("scientists-" + i).innerHTML = total[1];
+			var scientists = data.scientists[i];
+			var soldiers = data.soldiers[i];
+			document.getElementById("total-" + i).innerHTML = soldiers;
+			document.getElementById("scientists-" + i).innerHTML = scientists;
 
-			if (total[1] >= 100) {
-				document.getElementById("wall").style.display = "block";
-			}
-			if (total[1] >= 1000) {
-				document.getElementById("portal").style.display = "block";
+			if (i === countryIndex) {
+				if (scientists >= 100) {
+					document.getElementById("wall").style.display = "block";
+				}
+				if (scientists >= 1000) {
+					document.getElementById("portal").style.display = "block";
+				}
 			}
 		}
+		firstupdate = false;
 	} else if (msg.data.startsWith("map ")) {
 		width = msg.data.split(" ")[1] | 0;
 		height = msg.data.split(" ")[2] | 0;
