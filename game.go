@@ -220,8 +220,8 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
 		return false
 	}
-	if g.Armies[tileIndex] < 500 {
-		g.Armies[tileIndex] = 500
+	if g.Armies[tileIndex] < ((uint(g.Turn)/50)+1)*100 {
+		g.Armies[tileIndex] = ((uint(g.Turn) / 50) + 1) * 100
 	}
 	g.Terrain[tileIndex] = TILE_WALL
 	return true
