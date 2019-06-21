@@ -47,6 +47,7 @@ func NewGame(countries []string, width int, height int) *Game {
 		Schools:   make(map[int]bool),
 		Portals:   make(map[int]bool),
 		Losers:    make(map[int]bool),
+		Launchers: make(map[int]bool),
 		Turn:      0,
 		Width:     width,
 		Height:    height,
@@ -241,6 +242,18 @@ func (g *Game) MakeSchool(countryIndex int, tileIndex int) bool {
 	if g.Armies[tileIndex] <= 15 {
 		return false
 	}
+
+	schoolcount := 0
+	for school, _ := range g.Schools {
+		if g.Terrain[school] == countryIndex {
+			schoolcount++
+		}
+	}
+
+	if schoolcount >= 3 {
+		return false
+	}
+
 	g.Armies[tileIndex] = 0
 	g.Schools[tileIndex] = true
 	return true
