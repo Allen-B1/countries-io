@@ -165,8 +165,8 @@ var canAttack = false;
 
 var ws = new WebSocket((location.protocol == "https:" ? "wss":	"ws") + "://" + location.host + "/ws/game");
 
-var lastActive = null;
-function clickHandler(e) {	
+var lastActive = null, thisActive = null;
+function clickHandler(e) {
 	e.preventDefault();
 	if (e.shiftKey) {
 		if (lastActive != null) {
@@ -174,7 +174,6 @@ function clickHandler(e) {
 		}
 	}
 	if (map.terrain[this.id.slice(5)] === countryIndex) {
-		lastActive = this.id.slice(5);
 		this.focus();
 	} else
 		this.blur();
@@ -183,7 +182,7 @@ function clickHandler(e) {
 var firstupdate = true;
 ws.onmessage = function(msg) {
 	if (!msg.data.startsWith("update ")) console.log("ws: " + msg.data);
-	else console.log("update");
+	else console.log("ws: update");
 
 	if (msg.data.startsWith("update ")) {
 		canAttack = true;
@@ -279,6 +278,10 @@ ws.onmessage = function(msg) {
 				cell.classList.add("tile");
 				cell.setAttribute("tabindex", "-1");
 				cell.addEventListener("click", clickHandler);
+				cell.addEventListener("focus", function() {
+					lastActive = thisActive;
+					thisActive = this.id.slice(5) | 0;
+				});
 			}
 		}
 		maptable.style.width = (32 * width) + "px";
