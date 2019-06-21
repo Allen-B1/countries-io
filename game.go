@@ -223,7 +223,7 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 		return false
 	}
 	if g.Armies[tileIndex] < uint(g.Turn)*5/100*100 {
-		g.Armies[tileIndex] = uint(g.Turn)*5/100*100
+		g.Armies[tileIndex] = uint(g.Turn) * 5 / 100 * 100
 	}
 	if g.Armies[tileIndex] > 9999 {
 		g.Armies[tileIndex] = 9999
