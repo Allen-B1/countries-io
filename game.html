@@ -109,7 +109,7 @@ body {
 .instruction .key::after {
 	content: ":";
 }
-#wall, #portal { display: none; }
+#wall, #portal, #collect { display: none; }
 	</style>
 	</head>
 	<body>
@@ -120,7 +120,8 @@ body {
 			<div class="instruction" id="city"><span class="key">1</span> City</div>
 			<div class="instruction" id="school"><span class="key">2</span> School</div>
 			<div class="instruction" id="wall"><span class="key">3</span> Wall</div>
-			<div class="instruction" id="portal"><span class="key">4</span> Portal</div>
+			<div class="instruction" id="collect"><span class="key">4</span> Collect</div>
+			<div class="instruction" id="portal"><span class="key">5</span> Portal</div>
 		</div>
 		<table id="countries"></table>
 		<table id="map"></table>
@@ -243,6 +244,9 @@ ws.onmessage = function(msg) {
 				if (scientists >= 15) {
 					document.getElementById("wall").style.display = "block";
 				}
+				if (scientists >= 200) {
+					document.getElementById("collect").style.display = "block";
+				}
 				if (scientists >= 1000) {
 					document.getElementById("portal").style.display = "block";
 				}
@@ -355,6 +359,9 @@ window.onkeydown = function(e) {
 			ws.send("wall " + index);
 		}
 		if (e.key == "4") {
+			ws.send("collect " + index);
+		}
+		if (e.key == "5") {
 			ws.send("portal " + index);
 		}
     }

@@ -41,6 +41,7 @@ type gameThread struct {
 	MakeWall   [](chan int)
 	MakeSchool [](chan int)
 	MakePortal [](chan int)
+	Collect [](chan int)
 }
 
 var gameThreads = make(map[string]gameThread)
@@ -145,7 +146,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		case thread.Attack[info.Index] <- [2]int{fromTile, toTile}:
 		case <-time.After(500 * time.Millisecond):
 		}
-	case "city", "wall", "school", "portal":
+	case "city", "wall", "school", "portal", "collect":
 		if len(args) != 2 {
 			return
 		}
@@ -153,26 +154,17 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		if err != nil {
 			log.Println(err)
 		}
-		if args[0] == "city" {
-			select {
-			case thread.MakeCity[info.Index] <- tile:
-			case <-time.After(500 * time.Millisecond):
-			}
-		} else if args[0] == "wall" {
-			select {
-			case thread.MakeWall[info.Index] <- tile:
-			case <-time.After(500 * time.Millisecond):
-			}
-		} else if args[0] == "school" {
-			select {
-			case thread.MakeSchool[info.Index] <- tile:
-			case <-time.After(500 * time.Millisecond):
-			}
-		} else if args[0] == "portal" {
-			select {
-			case thread.MakePortal[info.Index] <- tile:
-			case <-time.After(500 * time.Millisecond):
-			}
+		channel := map[string](chan int) {
+			"city": thread.MakeCity[info.Index],
+			"wall": thread.MakeWall[info.Index],
+			"school": thread.MakeSchool[info.Index],
+			"portal": thread.MakePortal[info.Index],
+			"collect": thread.Collect[info.Index],
+		}[args[0]]
+
+		select {
+		case channel <- tile:
+		case <-time.After(300 * time.Millisecond):
 		}
 	}
 }
@@ -185,6 +177,7 @@ func startGameThread(gameId string, game *Game) {
 		thread.MakeWall = append(thread.MakeWall, make(chan int))
 		thread.MakeSchool = append(thread.MakeSchool, make(chan int))
 		thread.MakePortal = append(thread.MakePortal, make(chan int))
+		thread.Collect = append(thread.Collect, make(chan int))
 	}
 
 	gameThreads[gameId] = thread
@@ -207,7 +200,8 @@ func startGameThread(gameId string, game *Game) {
 	dur := 250 * time.Millisecond
 	oldterrain := make([]int, 0)
 	oldarmies := make([]uint, 0)
-	turn := false
+
+	turn := true
 	for {
 		// broadcast update
 		data, err := game.MarshalJSON(oldterrain, oldarmies)
@@ -235,10 +229,10 @@ func startGameThread(gameId string, game *Game) {
 		}
 
 		time.Sleep(dur)
-		turn = !turn
 		if turn {
 			game.NextTurn()
 		}
+		turn = !turn
 
 		// Read attacks
 		for countryIndex, attack := range thread.Attack {
@@ -277,6 +271,14 @@ func startGameThread(gameId string, game *Game) {
 			select {
 			case data := <-channel:
 				game.MakePortal(countryIndex, data)
+			default:
+			}
+		}
+
+		for countryIndex, channel := range thread.Collect {
+			select {
+			case data := <-channel:
+				game.Collect(countryIndex, data)
 			default:
 			}
 		}

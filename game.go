@@ -138,7 +138,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 	fromCol := fromTileIndex % g.Width
 	toCol := toTileIndex % g.Width
 	if !((fromRow == toRow && (fromCol-toCol == 1 || fromCol-toCol == -1)) || (fromCol == toCol && (fromRow-toRow == 1 || fromRow-toRow == -1))) &&
-		!(g.Portals[fromTileIndex] && g.Terrain[toTileIndex] == countryIndex) {
+		!(g.Portals[fromTileIndex] && (g.Terrain[toTileIndex] == countryIndex || g.Terrain[toTileIndex] == TILE_EMPTY)) {
 		return false
 	}
 
@@ -263,6 +263,30 @@ func (g *Game) MakePortal(countryIndex int, tileIndex int) bool {
 	}
 	g.Portals[tileIndex] = true
 	g.Armies[tileIndex] -= 100
+	return true
+}
+
+// Collects army in 7x7
+func (g *Game) Collect(countryIndex int, tileIndex int) bool {
+	if g.Scientists(countryIndex) < 200 {
+		return false
+	}
+	if g.Terrain[tileIndex] != countryIndex {
+		return false
+	}
+	if g.Schools[tileIndex] { return false }
+
+	total := uint(0)
+
+	for _, tile := range g.TilesAround(tileIndex, 3) {
+		if g.Terrain[tile] == countryIndex && !g.Schools[tile] && g.Armies[tile] >= 2 {
+			total += g.Armies[tile] - 1
+			g.Armies[tile] = 1
+		}
+	}
+
+	g.Armies[tileIndex] = total
+
 	return true
 }
 
