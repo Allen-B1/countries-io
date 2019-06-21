@@ -14,7 +14,7 @@
 	height:32px;
 	color: #fff;
 	text-align: center;
-    background: hsl(var(--color), 75%, 65%);
+	background: hsl(var(--color), 75%, 65%);
 	font-size: 12px;
 }
 #map, #countries {
@@ -41,22 +41,22 @@ body {
 }
 .tile[data-terrain="-2"] {
 	background: #888;
-    color: #fff; }
+	color: #fff; }
 .tile[data-terrain="-1"] {
-    background: transparent;
+	background: transparent;
 	color: #111; }
 .tile[data-terrain="0"], [data-index="0"] {
-    --color: 0; }
+	--color: 0; }
 .tile[data-terrain="1"], [data-index="1"] {
-    --color: 200; }
+	--color: 200; }
 .tile[data-terrain="2"], [data-index="2"] {
-    --color: 100; }
+	--color: 100; }
 .tile[data-terrain="3"], [data-index="3"] {
-    --color: 35; }
+	--color: 35; }
 .tile[data-terrain="4"], [data-index="4"] {
-    --color: 70; }
+	--color: 70; }
 .tile[data-terrain="5"], [data-index="5"] {
-    --color: 300; }
+	--color: 300; }
 .tile:focus {
 	outline: 2px solid hsl(var(--color), 65%, 55%);
 }
@@ -65,17 +65,17 @@ body {
 .tile[data-terrain="-1"]:focus {
 	outline: 2px solid #aaa; }
 .capital {
-    background: url(/capital.svg) hsl(var(--color), 75%, 65%);
+	background: url(/capital.svg) hsl(var(--color), 75%, 65%);
 }
 .city {
-    background: url(/city.svg) hsl(var(--color), 75%, 65%);
+	background: url(/city.svg) hsl(var(--color), 75%, 65%);
 }
 .portal {
-    background: url(/portal.svg) hsl(var(--color), 75%, 65%);
+	background: url(/portal.svg) hsl(var(--color), 75%, 65%);
 }
 .school {
 	color: hsl(var(--color), 55%, 35%);
-    background: url(/school.svg) hsl(var(--color), 75%, 65%);
+	background: url(/school.svg) hsl(var(--color), 75%, 65%);
 }
 .launcher {
 	background: url(/launcher.svg) hsl(var(--color), 75%, 65%);
@@ -147,11 +147,11 @@ function patch(old, diff) {
 	var out = [];
 	var i = 0;
 	while (i < diff.length) {
-		if (diff[i]) {  // matching
+		if (diff[i]) {	// matching
 			Array.prototype.push.apply(out, old.slice(out.length, out.length + diff[i]));
 		}
 		i++;
-		if (i < diff.length && diff[i]) {  // mismatching
+		if (i < diff.length && diff[i]) {	// mismatching
 			Array.prototype.push.apply(out, diff.slice(i + 1, i + 1 + diff[i]));
 			i += diff[i];
 		}
@@ -163,7 +163,7 @@ function patch(old, diff) {
 var capitalSelected = false;
 var canAttack = false;
 
-var ws = new WebSocket((location.protocol == "https:" ? "wss":  "ws") + "://" + location.host + "/ws/game");
+var ws = new WebSocket((location.protocol == "https:" ? "wss":	"ws") + "://" + location.host + "/ws/game");
 
 var lastActive = null;
 function clickHandler(e) {	
@@ -214,30 +214,30 @@ ws.onmessage = function(msg) {
 			}
 		}
 		if (firstupdate) {
-	        for (var tile of map.capitals) {
+			for (var tile of map.capitals) {
 				var elem = document.getElementById("tile-" + tile);
-    	        elem.classList.add("capital");
-    	    }
+				elem.classList.add("capital");
+			}
 		}
-        for (var tile of map.cities) {
+		for (var tile of map.cities) {
 			var elem = document.getElementById("tile-" + tile);
-            elem.classList.add("city");
+			elem.classList.add("city");
 			if (elem.classList.contains("capital"))
 				elem.classList.remove("capital");
-        }
-        for (var tile of map.portals) {
+		}
+		for (var tile of map.portals) {
 			var elem = document.getElementById("tile-" + tile);
-            elem.classList.add("portal");
-        }
-        for (var tile of map.launchers) {
+			elem.classList.add("portal");
+		}
+		for (var tile of map.launchers) {
 			var elem = document.getElementById("tile-" + tile);
-            elem.classList.add("launcher");
-        }
+			elem.classList.add("launcher");
+		}
 
-        if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
+		if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
 			for (var capital of map.capitals) {
 				if (map.terrain[capital] == countryIndex) {
-		            document.getElementById("tile-" + capital).focus();
+					document.getElementById("tile-" + capital).focus();
 					capitalSelected = true;
 					break;
 				}
@@ -337,34 +337,34 @@ ws.onopen = function() {
 window.onkeydown = function(e) {
 	if (document.activeElement.id && document.activeElement.id.startsWith("tile-")){
 		var index = document.activeElement.id.slice(5) | 0;
-        if (e.code == "KeyW" || e.code == "KeyA" || e.code == "KeyS" || e.code == "KeyD") {
+		if (e.code == "KeyW" || e.code == "KeyA" || e.code == "KeyS" || e.code == "KeyD") {
 			if (!canAttack || (map.terrain[index] != countryIndex && map.terrain[index] != -2)) return;
-            var endIndex;
-            switch (e.code) {
-            case "KeyA":
-                endIndex = index - 1;
-                break;
-            case "KeyD":
-                endIndex = index + 1;
-                break;
-            case "KeyW":
-                endIndex = index - width;
-                break;
-            case "KeyS":
-                endIndex = index + width;
-                break;
-            default: return;
-            }
+			var endIndex;
+			switch (e.code) {
+			case "KeyA":
+				endIndex = index - 1;
+				break;
+			case "KeyD":
+				endIndex = index + 1;
+				break;
+			case "KeyW":
+				endIndex = index - width;
+				break;
+			case "KeyS":
+				endIndex = index + width;
+				break;
+			default: return;
+			}
 			if (map.terrain[index] !== -2) {
-		        ws.send("attack " + index + " " + endIndex);
+			ws.send("attack " + index + " " + endIndex);
 				canAttack = false;
 			}
-            var endtile = document.getElementById("tile-" + endIndex);
-            if (endtile != null) endtile.focus();
-    	}
-        if (e.key == "1") {
-            ws.send("city " + index);
-        }
+			var endtile = document.getElementById("tile-" + endIndex);
+			if (endtile != null) endtile.focus();
+		}
+		if (e.key == "1") {
+			ws.send("city " + index);
+		}
 		if (e.key == "2") {
 			ws.send("school " + index);
 		}
@@ -380,7 +380,7 @@ window.onkeydown = function(e) {
 		if (e.key == "6") {
 			ws.send("portal " + index);
 		}
-    }
+	}
 }
 		</script>
 	</body>
