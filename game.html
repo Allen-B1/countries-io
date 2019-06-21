@@ -119,8 +119,8 @@ body {
 		<div id="instructions">
 			<div class="instruction" id="city"><span class="key">1</span> City</div>
 			<div class="instruction" id="school"><span class="key">2</span> School</div>
-			<div class="instruction" id="wall"><span class="key">3</span> Wall</div>
-			<div class="instruction" id="collect"><span class="key">4</span> Collect</div>
+			<div class="instruction" id="collect"><span class="key">3</span> Collect</div>
+			<div class="instruction" id="wall"><span class="key">4</span> Wall</div>
 			<div class="instruction" id="portal"><span class="key">5</span> Portal</div>
 		</div>
 		<table id="countries"></table>
@@ -356,10 +356,10 @@ window.onkeydown = function(e) {
 			ws.send("school " + index);
 		}
 		if (e.key == "3") {
-			ws.send("wall " + index);
+			ws.send("collect " + index);
 		}
 		if (e.key == "4") {
-			ws.send("collect " + index);
+			ws.send("wall " + index);
 		}
 		if (e.key == "5") {
 			ws.send("portal " + index);
