@@ -21,12 +21,13 @@ type Game struct {
 	Width  int
 	Height int
 
-	Terrain  []int        // countryId = [tileIndex]
-	Armies   []uint       // army = [tileIndex]
-	Cities   map[int]bool // isCity = [tileIndex]
-	Capitals map[int]bool // isCaptial = [tileIndex]
-	Schools  map[int]bool
-	Portals  map[int]bool
+	Terrain   []int        // countryId = [tileIndex]
+	Armies    []uint       // army = [tileIndex]
+	Cities    map[int]bool // isCity = [tileIndex]
+	Capitals  map[int]bool // isCaptial = [tileIndex]
+	Schools   map[int]bool
+	Launchers map[int]bool
+	Portals   map[int]bool
 
 	Losers map[int]bool // People who lost
 
@@ -217,7 +218,7 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
+	if g.TileSpecial(tileIndex) {
 		return false
 	}
 	if g.Armies[tileIndex] < ((uint(g.Turn)/50)+1)*100 {
@@ -231,7 +232,7 @@ func (g *Game) MakeSchool(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
+	if g.TileSpecial(tileIndex) {
 		return false
 	}
 	if g.TileType(tileIndex) != TILE_SUBURB {
@@ -252,7 +253,7 @@ func (g *Game) MakePortal(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	if g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
+	if g.TileSpecial(tileIndex) {
 		return false
 	}
 	if g.TileType(tileIndex) != TILE_SUBURB {
@@ -292,11 +293,37 @@ func (g *Game) Collect(countryIndex int, tileIndex int) bool {
 	return true
 }
 
+func (g *Game) MakeLauncher(countryIndex int, tileIndex int) bool {
+	if g.Scientists(countryIndex) < 500 {
+		return false
+	}
+	if g.Terrain[tileIndex] != countryIndex {
+		return false
+	}
+	if g.TileSpecial(tileIndex) {
+		return false
+	}
+	if g.TileType(tileIndex) != TILE_SUBURB {
+		return false
+	}
+	if g.Armies[tileIndex] <= 100 {
+		return false
+	}
+
+	g.Armies[tileIndex] -= 100
+	g.Launchers[tileIndex] = true
+
+	return true
+}
+
 func (g *Game) Leave(countryIndex int) {
 	g.Losers[countryIndex] = true
 }
 
-// TODO: Make this actually do stuff
+func (g *Game) TileSpecial(tileIndex int) bool {
+	return g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] || g.Launchers[tileIndex]
+}
+
 func createDiff(old []int, new_ []int) []int {
 	out := make([]int, 0)
 	if len(old) == 0 {
