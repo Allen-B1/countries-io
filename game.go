@@ -222,8 +222,11 @@ func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
 	if g.TileSpecial(tileIndex) {
 		return false
 	}
-	if g.Armies[tileIndex] < ((uint(g.Turn)/50)+1)*100 {
-		g.Armies[tileIndex] = ((uint(g.Turn) / 50) + 1) * 100
+	if g.Armies[tileIndex] < ((uint(g.Turn)/100*3)+1)*100 {
+		g.Armies[tileIndex] = ((uint(g.Turn) / 100 * 3) + 1) * 100
+	}
+	if g.Armies[tileIndex] > 9999 {
+		g.Armies[tileIndex] = 9999
 	}
 	g.Terrain[tileIndex] = TILE_WALL
 	return true
