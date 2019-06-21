@@ -176,7 +176,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 			g.Terrain[toTileIndex] = countryIndex
 		} else if targetArmy < g.Armies[toTileIndex] { // lose
 			if g.Terrain[toTileIndex] == TILE_WALL {
-				g.Armies[toTileIndex] += targetArmy
+				return false
 			} else {
 				g.Armies[toTileIndex] -= targetArmy
 			}
