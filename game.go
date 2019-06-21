@@ -274,7 +274,9 @@ func (g *Game) Collect(countryIndex int, tileIndex int) bool {
 	if g.Terrain[tileIndex] != countryIndex {
 		return false
 	}
-	if g.Schools[tileIndex] { return false }
+	if g.Schools[tileIndex] {
+		return false
+	}
 
 	total := uint(0)
 

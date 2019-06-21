@@ -41,7 +41,7 @@ type gameThread struct {
 	MakeWall   [](chan int)
 	MakeSchool [](chan int)
 	MakePortal [](chan int)
-	Collect [](chan int)
+	Collect    [](chan int)
 }
 
 var gameThreads = make(map[string]gameThread)
@@ -154,11 +154,11 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		if err != nil {
 			log.Println(err)
 		}
-		channel := map[string](chan int) {
-			"city": thread.MakeCity[info.Index],
-			"wall": thread.MakeWall[info.Index],
-			"school": thread.MakeSchool[info.Index],
-			"portal": thread.MakePortal[info.Index],
+		channel := map[string](chan int){
+			"city":    thread.MakeCity[info.Index],
+			"wall":    thread.MakeWall[info.Index],
+			"school":  thread.MakeSchool[info.Index],
+			"portal":  thread.MakePortal[info.Index],
 			"collect": thread.Collect[info.Index],
 		}[args[0]]
 
