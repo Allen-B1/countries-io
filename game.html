@@ -77,6 +77,9 @@ body {
 	color: hsl(var(--color), 55%, 35%);
     background: url(/school.svg) hsl(var(--color), 75%, 65%);
 }
+.launcher {
+	background: url(/launcher.svg) hsl(var(--color), 75%, 65%);
+}
 
 .country {
 	color: hsl(var(--color), 75%, 65%);
@@ -121,7 +124,8 @@ body {
 			<div class="instruction" id="school"><span class="key">2</span> School</div>
 			<div class="instruction" id="collect"><span class="key">3</span> Collect</div>
 			<div class="instruction" id="wall"><span class="key">4</span> Wall</div>
-			<div class="instruction" id="portal"><span class="key">5</span> Portal</div>
+			<div class="instruction" id="launcher"><span class="key">5</span> Launcher</div>
+			<div class="instruction" id="portal"><span class="key">6</span> Portal</div>
 		</div>
 		<table id="countries"></table>
 		<table id="map"></table>
@@ -133,6 +137,7 @@ var map = {
 	cities: [],
 	schools: null,
 	portals: [],
+	launchers: []
 };
 var countries = [];
 var width, height;
@@ -188,6 +193,7 @@ ws.onmessage = function(msg) {
 		map.capitals = data.capitals;
 		map.schools = new Set(data.schools);
 		map.portals = data.portals;
+		map.launchers = data.launchers;
 		map.terrain = patch(map.terrain, data.terrain_diff);
 		map.armies = patch(map.armies, data.armies_diff);
 
@@ -223,6 +229,10 @@ ws.onmessage = function(msg) {
 			var elem = document.getElementById("tile-" + tile);
             elem.classList.add("portal");
         }
+        for (var tile of map.launchers) {
+			var elem = document.getElementById("tile-" + tile);
+            elem.classList.add("launcher");
+        }
 
         if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
 			for (var capital of map.capitals) {
@@ -246,6 +256,9 @@ ws.onmessage = function(msg) {
 				}
 				if (scientists >= 200) {
 					document.getElementById("collect").style.display = "block";
+				}
+				if (scientists >= 500) {
+					document.getElementById("launcher").style.display = "block";
 				}
 				if (scientists >= 1000) {
 					document.getElementById("portal").style.display = "block";
@@ -362,6 +375,9 @@ window.onkeydown = function(e) {
 			ws.send("wall " + index);
 		}
 		if (e.key == "5") {
+			ws.send("launcher " + index);
+		}
+		if (e.key == "6") {
 			ws.send("portal " + index);
 		}
     }

@@ -36,12 +36,13 @@ func broadcastGame(gameId string, message string) {
 }
 
 type gameThread struct {
-	Attack     [](chan [2]int)
-	MakeCity   [](chan int)
-	MakeWall   [](chan int)
-	MakeSchool [](chan int)
-	MakePortal [](chan int)
-	Collect    [](chan int)
+	Attack       [](chan [2]int)
+	MakeCity     [](chan int)
+	MakeWall     [](chan int)
+	MakeSchool   [](chan int)
+	MakePortal   [](chan int)
+	Collect      [](chan int)
+	MakeLauncher [](chan int)
 }
 
 var gameThreads = make(map[string]gameThread)
@@ -146,7 +147,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		case thread.Attack[info.Index] <- [2]int{fromTile, toTile}:
 		case <-time.After(500 * time.Millisecond):
 		}
-	case "city", "wall", "school", "portal", "collect":
+	case "city", "wall", "school", "portal", "collect", "launcher":
 		if len(args) != 2 {
 			return
 		}
@@ -155,11 +156,12 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			log.Println(err)
 		}
 		channel := map[string](chan int){
-			"city":    thread.MakeCity[info.Index],
-			"wall":    thread.MakeWall[info.Index],
-			"school":  thread.MakeSchool[info.Index],
-			"portal":  thread.MakePortal[info.Index],
-			"collect": thread.Collect[info.Index],
+			"city":     thread.MakeCity[info.Index],
+			"wall":     thread.MakeWall[info.Index],
+			"school":   thread.MakeSchool[info.Index],
+			"portal":   thread.MakePortal[info.Index],
+			"collect":  thread.Collect[info.Index],
+			"launcher": thread.MakeLauncher[info.Index],
 		}[args[0]]
 
 		select {
@@ -178,6 +180,7 @@ func startGameThread(gameId string, game *Game) {
 		thread.MakeSchool = append(thread.MakeSchool, make(chan int))
 		thread.MakePortal = append(thread.MakePortal, make(chan int))
 		thread.Collect = append(thread.Collect, make(chan int))
+		thread.MakeLauncher = append(thread.MakeLauncher, make(chan int))
 	}
 
 	gameThreads[gameId] = thread
@@ -279,6 +282,14 @@ func startGameThread(gameId string, game *Game) {
 			select {
 			case data := <-channel:
 				game.Collect(countryIndex, data)
+			default:
+			}
+		}
+
+		for countryIndex, channel := range thread.MakeLauncher {
+			select {
+			case data := <-channel:
+				game.MakeLauncher(countryIndex, data)
 			default:
 			}
 		}

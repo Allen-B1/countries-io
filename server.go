@@ -34,6 +34,9 @@ func main() {
 	http.HandleFunc("/portal.svg", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "portal.svg")
 	})
+	http.HandleFunc("/launcher.svg", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "launcher.svg")
+	})
 	http.HandleFunc("/sound.wav", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "sound.wav")
 	})

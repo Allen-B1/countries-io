@@ -139,9 +139,25 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 	toRow := toTileIndex / g.Width
 	fromCol := fromTileIndex % g.Width
 	toCol := toTileIndex % g.Width
-	if !((fromRow == toRow && (fromCol-toCol == 1 || fromCol-toCol == -1)) || (fromCol == toCol && (fromRow-toRow == 1 || fromRow-toRow == -1))) &&
-		!(g.Portals[fromTileIndex] && (g.Terrain[toTileIndex] == countryIndex || g.Terrain[toTileIndex] == TILE_EMPTY)) {
-		return false
+	if !((fromRow == toRow && (fromCol-toCol == 1 || fromCol-toCol == -1)) || (fromCol == toCol && (fromRow-toRow == 1 || fromRow-toRow == -1))) {
+		if g.Portals[fromTileIndex] && (g.Terrain[toTileIndex] == countryIndex || g.Terrain[toTileIndex] == TILE_EMPTY) {
+			// do nothing
+		} else if g.Launchers[fromTileIndex] {
+			if g.Armies[fromTileIndex] <= 100 {
+				return false
+			}
+			g.Armies[fromTileIndex] -= 100
+			for _, tile := range g.TilesAround(toTileIndex, 2) {
+				if g.Armies[tile] > 30 {
+					g.Armies[tile] -= 30
+				} else {
+					g.DeleteTile(tile)
+				}
+			}
+			return true
+		} else {
+			return false
+		}
 	}
 
 	var targetArmy = g.Armies[fromTileIndex] - 1
@@ -181,8 +197,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 				g.Armies[toTileIndex] -= targetArmy
 			}
 		} else if targetArmy == g.Armies[toTileIndex] { // tie
-			g.Armies[toTileIndex] = 0
-			g.Terrain[toTileIndex] = TILE_EMPTY
+			g.DeleteTile(toTileIndex)
 		}
 
 		if toCountry >= 0 {
@@ -332,6 +347,16 @@ func (g *Game) MakeLauncher(countryIndex int, tileIndex int) bool {
 	return true
 }
 
+func (g *Game) DeleteTile(tileIndex int) {
+	g.Armies[tileIndex] = 0
+	g.Terrain[tileIndex] = TILE_EMPTY
+	delete(g.Cities, tileIndex)
+	delete(g.Capitals, tileIndex)
+	delete(g.Schools, tileIndex)
+	delete(g.Portals, tileIndex)
+	delete(g.Launchers, tileIndex)
+}
+
 func (g *Game) Leave(countryIndex int) {
 	g.Losers[countryIndex] = true
 }
@@ -390,6 +415,7 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 	capitallist := make([]int, 0, len(g.Capitals))
 	schools := make([]int, 0, len(g.Schools))
 	portals := make([]int, 0, len(g.Portals))
+	launchers := make([]int, 0, len(g.Launchers))
 	for city, _ := range g.Cities {
 		citylist = append(citylist, city)
 	}
@@ -402,10 +428,14 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 	for portal, _ := range g.Portals {
 		portals = append(portals, portal)
 	}
+	for launcher, _ := range g.Launchers {
+		launchers = append(launchers, launcher)
+	}
 	sort.Ints(citylist)
 	sort.Ints(capitallist)
 	sort.Ints(schools)
 	sort.Ints(portals)
+	sort.Ints(launchers)
 
 	terraindiff := createDiff(oldterrain, g.Terrain)
 
@@ -444,6 +474,7 @@ func (g *Game) MarshalJSON(oldterrain []int, oldarmies []uint) ([]byte, error) {
 		"turn":         g.Turn,
 		"soldiers":     soldiers,
 		"scientists":   scientists,
+		"launchers":    launchers,
 	})
 }
 
