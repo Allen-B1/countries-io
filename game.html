@@ -267,18 +267,10 @@ ws.onmessage = function(msg) {
 			document.getElementById("scientists-" + i).innerHTML = scientists;
 
 			if (i === countryIndex) {
-				if (scientists >= 15) {
-					document.getElementById("wall").style.display = "block";
-				}
-				if (scientists >= 200) {
-					document.getElementById("collect").style.display = "block";
-				}
-				if (scientists >= 500) {
-					document.getElementById("launcher").style.display = "block";
-				}
-				if (scientists >= 1000) {
-					document.getElementById("portal").style.display = "block";
-				}
+				document.getElementById("wall").style.display = scientists >= 15 ? "block": "none";
+				document.getElementById("collect").style.display = scientists >= 200 ? "block": "none";
+				document.getElementById("launcher").style.display = scientists >= 500 ? "block": "none";
+				document.getElementById("portal").style.display = scientists >= 1000 ? "block": "none";
 			}
 		}
 		firstupdate = false;
