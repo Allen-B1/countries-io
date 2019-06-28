@@ -531,9 +531,11 @@ func (g *Game) ConvertAround(tile int, r int, countryIndex int, fromCountryIndex
 		if g.Terrain[tileAround] != fromCountryIndex {
 			continue
 		}
-		g.Terrain[tileAround] = countryIndex
-		if g.Armies[tileAround] == 0 {
-			g.Armies[tileAround] = 1
+		if g.Armies[tileAround] < g.Armies[tile] || g.Armies[tileAround] == 0 || g.Schools[tileAround] {
+			g.Terrain[tileAround] = countryIndex
+			if g.Armies[tileAround] == 0 {
+				g.Armies[tileAround] = 1
+			}
 		}
 	}
 }
