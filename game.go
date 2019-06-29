@@ -75,26 +75,36 @@ func NewGame(countries []string, width int, height int) *Game {
 		g.Terrain[index] = TILE_EMPTY
 	}
 
-	for countryIndex, _ := range g.Countries {
-	makecapital:
-		for {
-			index := rand.Intn(size)
-			if _, ok := g.Capitals[index]; ok {
-				continue
-			}
-			for _, tileAround := range g.TilesAround(index, 18) {
-				if g.Capitals[tileAround] {
-					log.Println("Capital too close, getting another")
-					continue makecapital
+	if len(g.Countries) != 2 {
+		for countryIndex, _ := range g.Countries {
+		makecapital:
+			for {
+				index := rand.Intn(size)
+				if _, ok := g.Capitals[index]; ok {
+					continue
 				}
+				for _, tileAround := range g.TilesAround(index, 18) {
+					if g.Capitals[tileAround] {
+						log.Println("Capital too close, getting another")
+						continue makecapital
+					}
+				}
+
+				g.Terrain[index] = countryIndex
+				g.Capitals[index] = true
+				g.ConvertAround(index, 2, countryIndex, TILE_EMPTY)
+
+				break
 			}
-
-			g.Terrain[index] = countryIndex
-			g.Capitals[index] = true
-			g.ConvertAround(index, 2, countryIndex, TILE_EMPTY)
-
-			break
 		}
+	} else {
+		g.Capitals[0] = true
+		g.Terrain[0] = 0
+		g.ConvertAround(0, 2, 0, TILE_EMPTY)
+
+		g.Capitals[size-1] = true
+		g.Terrain[size-1] = 1
+		g.ConvertAround(size-1, 2, 1, TILE_EMPTY)
 	}
 
 	return g
