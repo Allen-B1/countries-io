@@ -339,14 +339,62 @@ func (g *Game) Collect(countryIndex int, tileIndex int) bool {
 
 	total := uint(0)
 
-	for _, tile := range g.TilesAround(tileIndex, 2) {
-		if g.Terrain[tile] == countryIndex && !g.Schools[tile] && g.Armies[tile] >= 2 {
-			total += g.Armies[tile] - 1
-			g.Armies[tile] = 1
+	centerRow := tileIndex / g.Width
+	centerCol := tileIndex % g.Width
+	startCol := centerCol - 2
+	if startCol < 0 {
+		startCol = 0
+	}
+	endCol := centerCol + 2
+	if endCol >= g.Width {
+		endCol = g.Width - 1
+	}
+	startRow := centerRow - 2
+	if startRow < 0 {
+		startRow = 0
+	}
+	endRow := centerRow + 2
+	if endRow >= g.Height {
+		endRow = g.Height - 1
+	}
+
+	// Which tiles are reachable (i.e. a wall doesn't block)
+	reachable := make(map[int]bool)
+	var makeReachable func (int)
+	makeReachable = func(tile int) {
+		if reachable[tile] {
+			return
+		}
+		row := tile / g.Width
+		col := tile % g.Width
+//		log.Printf("Tile (%d, %d) Limits (%d-%d %d-%d)\n", row, col, startRow, endRow, startCol, endCol)
+		if g.Terrain[tile] != countryIndex {
+			return
+		}
+		reachable[tile] = true
+		if col > startCol {
+			makeReachable(tile - 1)
+		}
+		if col < endCol {
+			makeReachable(tile + 1)
+		}
+		if row > startRow {
+			makeReachable(tile - g.Width)
+		}
+		if row < endRow {
+			makeReachable(tile + g.Width)
+		}
+	}
+	makeReachable(tileIndex)
+
+	for tileAround, _ := range reachable {
+		if g.Terrain[tileAround] == countryIndex && !g.Schools[tileAround] && g.Armies[tileAround] >= 2 {
+			total += g.Armies[tileAround] - 1
+			g.Armies[tileAround] = 1
 		}
 	}
 
-	g.Armies[tileIndex] = total
+	g.Armies[tileIndex] += total
 
 	return true
 }
