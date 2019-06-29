@@ -307,15 +307,15 @@ func (g *Game) MakePortal(countryIndex int, tileIndex int) bool {
 	if g.TileType(tileIndex) != TILE_SUBURB {
 		return false
 	}
-	if g.Armies[tileIndex] <= 100 {
+	if g.Armies[tileIndex] <= 500 {
 		return false
 	}
 	g.Portals[tileIndex] = true
-	g.Armies[tileIndex] -= 100
+	g.Armies[tileIndex] -= 500
 	return true
 }
 
-// Collects army in 7x7
+// Collects army in 5x5
 func (g *Game) Collect(countryIndex int, tileIndex int) bool {
 	if g.Scientists(countryIndex) < 200 {
 		return false
@@ -329,7 +329,7 @@ func (g *Game) Collect(countryIndex int, tileIndex int) bool {
 
 	total := uint(0)
 
-	for _, tile := range g.TilesAround(tileIndex, 3) {
+	for _, tile := range g.TilesAround(tileIndex, 2) {
 		if g.Terrain[tile] == countryIndex && !g.Schools[tile] && g.Armies[tile] >= 2 {
 			total += g.Armies[tile] - 1
 			g.Armies[tile] = 1
@@ -354,11 +354,11 @@ func (g *Game) MakeLauncher(countryIndex int, tileIndex int) bool {
 	if g.TileType(tileIndex) != TILE_SUBURB {
 		return false
 	}
-	if g.Armies[tileIndex] <= 100 {
+	if g.Armies[tileIndex] <= 500 {
 		return false
 	}
 
-	g.Armies[tileIndex] -= 100
+	g.Armies[tileIndex] -= 500
 	g.Launchers[tileIndex] = true
 
 	return true
