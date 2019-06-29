@@ -129,6 +129,13 @@ body {
 .instruction .key::after {
 	content: ":";
 }
+.price {
+	display: inline-block;
+	font-size: 12px;
+	background: rgba(128,128,128,0.5);
+	color: #fff;
+	padding: 4px;
+}
 #wall, #portal, #collect, #launcher { display: none; }
 	</style>
 	</head>
@@ -137,12 +144,12 @@ body {
 		<div id="error"></div>
 		<div id="turn-container">Turn <span id="turn">0</span></div>
 		<div id="instructions">
-			<div class="instruction" id="city"><span class="key">1</span> City</div>
-			<div class="instruction" id="school"><span class="key">2</span> School</div>
+			<div class="instruction" id="city"><span class="key">1</span> City <span class="price">-30</span></div>
+			<div class="instruction" id="school"><span class="key">2</span> School <span class="price">-15</span></div>
 			<div class="instruction" id="collect"><span class="key">3</span> Collect</div>
 			<div class="instruction" id="wall"><span class="key">4</span> Wall</div>
-			<div class="instruction" id="launcher"><span class="key">5</span> Launcher</div>
-			<div class="instruction" id="portal"><span class="key">6</span> Portal</div>
+			<div class="instruction" id="launcher"><span class="key">5</span> Launcher <span class="price">-500</span></div>
+			<div class="instruction" id="portal"><span class="key">6</span> Portal <span class="price">-500</span></div>
 		</div>
 		<table id="countries"></table>
 		<table id="map"></table>
