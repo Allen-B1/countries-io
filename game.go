@@ -394,7 +394,7 @@ func (g *Game) Collect(countryIndex int, tileIndex int) bool {
 		}
 	}
 
-	g.Armies[tileIndex] += total
+	g.Armies[tileIndex] = total + 1
 
 	return true
 }
