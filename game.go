@@ -360,14 +360,14 @@ func (g *Game) Collect(countryIndex int, tileIndex int) bool {
 
 	// Which tiles are reachable (i.e. a wall doesn't block)
 	reachable := make(map[int]bool)
-	var makeReachable func (int)
+	var makeReachable func(int)
 	makeReachable = func(tile int) {
 		if reachable[tile] {
 			return
 		}
 		row := tile / g.Width
 		col := tile % g.Width
-//		log.Printf("Tile (%d, %d) Limits (%d-%d %d-%d)\n", row, col, startRow, endRow, startCol, endCol)
+		//		log.Printf("Tile (%d, %d) Limits (%d-%d %d-%d)\n", row, col, startRow, endRow, startCol, endCol)
 		if g.Terrain[tile] != countryIndex {
 			return
 		}
