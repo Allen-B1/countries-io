@@ -157,7 +157,7 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 	fromCol := fromTileIndex % g.Width
 	toCol := toTileIndex % g.Width
 	if !((fromRow == toRow && (fromCol-toCol == 1 || fromCol-toCol == -1)) || (fromCol == toCol && (fromRow-toRow == 1 || fromRow-toRow == -1))) {
-		if g.Portals[fromTileIndex] && (g.Terrain[toTileIndex] == countryIndex || g.Terrain[toTileIndex] == TILE_EMPTY) {
+		if g.Portals[fromTileIndex] && g.Terrain[toTileIndex] == countryIndex && g.Portals[toTileIndex] {
 			// do nothing
 		} else if g.Launchers[fromTileIndex] {
 			if g.Armies[fromTileIndex] <= 100 {
