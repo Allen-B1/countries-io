@@ -217,7 +217,9 @@ func startGameThread(gameId string, game *Game) {
 		}
 	}
 
-	dur := 250 * time.Millisecond
+	ticker := time.NewTicker(250 * time.Millisecond)
+	defer ticker.Stop()
+
 	oldterrain := make([]int, 0)
 	oldarmies := make([]uint, 0)
 
@@ -248,7 +250,7 @@ func startGameThread(gameId string, game *Game) {
 			return
 		}
 
-		time.Sleep(dur)
+		<-ticker.C
 		if turn {
 			game.NextTurn()
 		}
