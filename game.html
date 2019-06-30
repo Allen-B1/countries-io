@@ -27,14 +27,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 	position: fixed;
 	top: 0; left: 0; width: 100%; height: 100%;
 }
-.tile {
-	width: 32px;
-	height:32px;
-	color: #fff;
-	text-align: center;
-	background: hsl(var(--color), 75%, 65%);
-	font-size: 12px;
-}
 #map, #countries {
 	border-collapse: collapse; }
 #map {
@@ -44,7 +36,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 	top: 16px; right: 16px;
 	background: rgba(250,250,250,0.8);
 	color: #000;
-	font-size: 14px;
+	font-size: 16px;
 	pointer-events: none;
 }
 
@@ -57,6 +49,15 @@ body {
 }
 #countries td {
 	padding: 8px 12px;
+}
+.tile {
+	width: 36px;
+	height:36px;
+	color: #fff;
+	text-align: center;
+	background: hsl(var(--color), 75%, 65%);
+	font-size: 15px;
+	background-position: center;
 }
 .tile[data-terrain="-2"] {
 	background: #888;
@@ -112,7 +113,6 @@ body {
 }
 #instructions {
 	background: transparent;
-	font-size: 14px;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
@@ -133,7 +133,7 @@ body {
 }
 .price {
 	display: inline-block;
-	font-size: 12px;
+	font-size: 14px;
 	background: rgba(128,128,128,0.5);
 	color: #fff;
 	padding: 2px 4px;
