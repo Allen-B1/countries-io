@@ -49,3 +49,17 @@ input:focus {
 .blue {
 	color: hsl(200, 75%, 65%);
 }
+
+a {
+	color: hsl(200, 55%, 45%);
+	text-decoration: none;
+}
+a:visited {
+	color: hsl(300, 55%, 45%);
+}
+a:hover, a:focus {
+	text-decoration: underline;
+}
+a:active {
+	color: hsl(0, 55%, 45%);
+}
