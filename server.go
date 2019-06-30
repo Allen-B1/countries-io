@@ -28,9 +28,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
+var roomUpgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+}
+var gameUpgrader = websocket.Upgrader{
+	ReadBufferSize:    1024,
+	WriteBufferSize:   1024,
+	EnableCompression: true,
 }
 
 func main() {
@@ -59,7 +64,7 @@ func main() {
 	})
 
 	http.HandleFunc("/ws/room", func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
+		conn, err := roomUpgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
 			return
@@ -82,7 +87,7 @@ func main() {
 	})
 
 	http.HandleFunc("/ws/game", func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
+		conn, err := gameUpgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
 			return
