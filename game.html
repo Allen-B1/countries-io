@@ -363,10 +363,12 @@ window.onkeydown = function(e) {
 			var endIndex;
 			switch (e.code) {
 			case "KeyA":
-				endIndex = index - 1;
+				if (index % width != 0)
+					endIndex = index - 1;
 				break;
 			case "KeyD":
-				endIndex = index + 1;
+				if (index % width != width-1)
+					endIndex = index + 1;
 				break;
 			case "KeyW":
 				endIndex = index - width;
