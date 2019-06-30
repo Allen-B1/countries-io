@@ -93,7 +93,6 @@ func main() {
 			return
 		}
 
-		// wait for join command
 		for {
 			mt, msg, err := conn.ReadMessage()
 			if _, ok := err.(*websocket.CloseError); ok {

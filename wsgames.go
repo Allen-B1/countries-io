@@ -86,21 +86,16 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		}
 		gameId := args[1]
 
-		gameConns.Lock()
-		// Check if game exists
-		if _, ok := games[gameId]; !ok {
-			conn.WriteMessage(websocket.TextMessage, []byte("error game doesn't exist"))
-			return
-		}
-
 		index, err := strconv.Atoi(args[2])
 		if err != nil {
 			conn.WriteMessage(websocket.TextMessage, []byte("error "+err.Error()))
 			return
 		}
-		gameConns.Unlock()
 
-		thread := gameThreads[gameId]
+		thread, ok := gameThreads[gameId]
+		if !ok {
+			conn.WriteMessage(websocket.TextMessage, []byte("error game doesn't exist"))
+		}
 		thread.Join <- index
 		select {
 		case data := <-thread.Data[index]:
