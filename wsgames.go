@@ -53,6 +53,12 @@ func broadcastGame(gameId string, message string) {
 }
 
 type gameThread struct {
+	Join chan int // Incoming
+	// Outgoing
+	Data  [](chan []string)
+	Error []chan string
+
+	// Incoming
 	Attack       [](chan [2]int)
 	MakeCity     [](chan int)
 	MakeWall     [](chan int)
@@ -94,35 +100,22 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		}
 		gameConns.Unlock()
 
-		if index >= 0 {
-			gameConns.Lock()
-			for _, info := range gameConns.Map {
-				if info.Game == gameId && info.Index == index {
-					conn.WriteMessage(websocket.TextMessage, []byte("error somebody took your place"))
-					gameConns.Unlock()
-					return
-				}
+		thread := gameThreads[gameId]
+		thread.Join <- index
+		select {
+		case data := <-thread.Data[index]:
+			for _, message := range data {
+				conn.WriteMessage(websocket.TextMessage, []byte(message))
 			}
-			gameConns.Unlock()
+		case err := <-thread.Error[index]:
+			conn.WriteMessage(websocket.TextMessage, []byte("error "+err))
+			return
 		}
 
+		// Write connection
 		gameConns.Lock()
 		gameConns.Map[conn] = gameConnInfo{Game: gameId, Index: index}
-
-		game := games[gameId]
-
-		if index < 0 {
-			data, err := game.MarshalJSON(nil, nil)
-			if err != nil {
-				log.Println(err)
-			} else {
-				conn.WriteMessage(websocket.TextMessage, []byte("update "+string(data)))
-			}
-		}
 		gameConns.Unlock()
-
-		conn.WriteMessage(websocket.TextMessage, []byte("player_list "+strings.Join(game.Countries, " ")))
-		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("map %d %d", game.Width, game.Height)))
 		return
 	}
 
@@ -190,7 +183,10 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 
 func startGameThread(gameId string, game *Game) {
 	thread := gameThread{}
+	thread.Join = make(chan int)
 	for _, _ = range game.Countries {
+		thread.Data = append(thread.Data, make(chan []string))
+		thread.Error = append(thread.Error, make(chan string))
 		thread.Attack = append(thread.Attack, make(chan [2]int))
 		thread.MakeCity = append(thread.MakeCity, make(chan int))
 		thread.MakeWall = append(thread.MakeWall, make(chan int))
@@ -203,17 +199,29 @@ func startGameThread(gameId string, game *Game) {
 	gameThreads[gameId] = thread
 
 	// wait for all to join
-	for {
-		n := 0
+	for n := 0; n < len(game.Countries); n++ {
+		index := <-thread.Join
+
+		if index < 0 {
+			continue
+		}
+
+		// Check if somebody already connected as that player
 		gameConns.Lock()
 		for _, info := range gameConns.Map {
-			if info.Game == gameId && info.Index >= 0 {
-				n++
+			if info.Game == gameId && info.Index == index {
+				thread.Error[index] <- "somebody took your place"
+				gameConns.Unlock()
+				continue
 			}
 		}
 		gameConns.Unlock()
-		if n >= len(game.Countries) {
-			break
+
+		game := games[gameId]
+
+		thread.Data[index] <- []string{
+			"player_list " + strings.Join(game.Countries, " "),
+			fmt.Sprintf("map %d %d", game.Width, game.Height),
 		}
 	}
 
@@ -247,6 +255,7 @@ func startGameThread(gameId string, game *Game) {
 		if len(game.Countries)-len(game.Losers) <= 1 {
 			delete(games, gameId)
 			delete(gameThreads, gameId)
+			// go through gameConnInfos
 			return
 		}
 
