@@ -53,9 +53,11 @@ func broadcastGame(gameId string, message string) {
 }
 
 type gameThread struct {
-	Join chan int // Incoming
+	Join chan struct {
+		int
+		*websocket.Conn
+	} // Incoming
 	// Outgoing
-	Data  [](chan []string)
 	Error []chan string
 
 	// Incoming
@@ -96,21 +98,15 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		if !ok {
 			conn.WriteMessage(websocket.TextMessage, []byte("error game doesn't exist"))
 		}
-		thread.Join <- index
+		thread.Join <- struct {
+			int
+			*websocket.Conn
+		}{index, conn}
 		select {
-		case data := <-thread.Data[index]:
-			for _, message := range data {
-				conn.WriteMessage(websocket.TextMessage, []byte(message))
-			}
 		case err := <-thread.Error[index]:
 			conn.WriteMessage(websocket.TextMessage, []byte("error "+err))
-			return
+		case <-time.After(500 * time.Millisecond):
 		}
-
-		// Write connection
-		gameConns.Lock()
-		gameConns.Map[conn] = gameConnInfo{Game: gameId, Index: index}
-		gameConns.Unlock()
 		return
 	}
 
@@ -178,9 +174,11 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 
 func startGameThread(gameId string, game *Game) {
 	thread := gameThread{}
-	thread.Join = make(chan int)
+	thread.Join = make(chan struct {
+		int
+		*websocket.Conn
+	})
 	for _, _ = range game.Countries {
-		thread.Data = append(thread.Data, make(chan []string))
 		thread.Error = append(thread.Error, make(chan string))
 		thread.Attack = append(thread.Attack, make(chan [2]int))
 		thread.MakeCity = append(thread.MakeCity, make(chan int))
@@ -193,9 +191,14 @@ func startGameThread(gameId string, game *Game) {
 
 	gameThreads[gameId] = thread
 
+	n := 1
 	// wait for all to join
-	for n := 0; n < len(game.Countries); n++ {
-		index := <-thread.Join
+	for n <= len(game.Countries) {
+		data := <-thread.Join
+		index := data.int
+		conn := data.Conn
+
+		log.Printf("%d joined\n", index)
 
 		if index < 0 {
 			continue
@@ -210,15 +213,15 @@ func startGameThread(gameId string, game *Game) {
 				continue
 			}
 		}
+
+		gameConns.Map[conn] = gameConnInfo{Game: gameId, Index: index}
 		gameConns.Unlock()
-
-		game := games[gameId]
-
-		thread.Data[index] <- []string{
-			"player_list " + strings.Join(game.Countries, " "),
-			fmt.Sprintf("map %d %d", game.Width, game.Height),
-		}
+		n++
 	}
+
+	broadcastGame(gameId, "player_list "+strings.Join(game.Countries, " "))
+	broadcastGame(gameId, fmt.Sprintf("map %d %d", game.Width, game.Height))
+	log.Println("Broadcasted " + gameId)
 
 	ticker := time.NewTicker(250 * time.Millisecond)
 	defer ticker.Stop()
