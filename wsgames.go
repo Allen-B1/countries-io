@@ -135,7 +135,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 
 	switch args[0] {
 	case "attack":
-		if len(args) != 3 {
+		if len(args) < 3 {
 			return
 		}
 		fromTile, err1 := strconv.Atoi(args[1])

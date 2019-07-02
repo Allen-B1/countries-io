@@ -100,6 +100,9 @@ body {
 .launcher {
 	background: url(/launcher.svg) hsl(var(--color), 75%, 65%);
 }
+#map[data-half] .tile:focus {
+	filter: brightness(50%);
+}
 
 .country {
 	color: hsl(var(--color), 75%, 65%);
@@ -191,18 +194,29 @@ var canAttack = false;
 
 var ws = new WebSocket((location.protocol == "https:" ? "wss":	"ws") + "://" + location.host + "/ws/game");
 
-var lastActive = null, thisActive = null;
+function isHalf() {
+	return +document.getElementById("map").hasAttribute("data-half");
+}
+
+var lastActive = null;
 function clickHandler(e) {
 	e.preventDefault();
+	if (lastActive == this.id.slice(5) && !isHalf()) { 
+		document.getElementById("map").setAttribute("data-half", "");
+	} else {
+		document.getElementById("map").removeAttribute("data-half");
+	}
 	if (e.shiftKey) {
 		if (lastActive != null) {
-			ws.send("attack " + lastActive + " " + this.id.slice(5));
+			ws.send("attack " + lastActive + " " + this.id.slice(5) + " " + isHalf());
 		}
 	}
 	if (map.terrain[this.id.slice(5)] === countryIndex) {
 		this.focus();
 	} else
 		this.blur();
+
+	lastActive = this.id.slice(5) | 0;
 }
 
 var firstupdate = true;
@@ -263,6 +277,7 @@ ws.onmessage = function(msg) {
 			for (var capital of map.capitals) {
 				if (map.terrain[capital] == countryIndex) {
 					document.getElementById("tile-" + capital).focus();
+					lastActive = capital;
 					capitalSelected = true;
 					break;
 				}
@@ -296,10 +311,6 @@ ws.onmessage = function(msg) {
 				cell.classList.add("tile");
 				cell.setAttribute("tabindex", "-1");
 				cell.addEventListener("click", clickHandler);
-				cell.addEventListener("focus", function() {
-					lastActive = thisActive;
-					thisActive = this.id.slice(5) | 0;
-				});
 			}
 		}
 		maptable.style.width = (36 * width) + "px";
@@ -382,11 +393,15 @@ window.onkeydown = function(e) {
 				return;
 			}
 			if (map.terrain[index] !== -2) {
-				ws.send("attack " + index + " " + endIndex);
+				ws.send("attack " + index + " " + endIndex + " " + isHalf());
 				canAttack = false;
+				document.getElementById("map").removeAttribute("data-half");
 			}
 			var endtile = document.getElementById("tile-" + endIndex);
-			if (endtile != null) endtile.focus();
+			if (endtile != null) {
+				endtile.focus();
+				lastActive = index;
+			}
 		}
 		if (e.key == "1") {
 			ws.send("city " + index);
