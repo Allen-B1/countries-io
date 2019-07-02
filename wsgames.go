@@ -61,7 +61,7 @@ type gameThread struct {
 	Error []chan string
 
 	// Incoming
-	Attack       [](chan [2]int)
+	Attack       [](chan [3]int)
 	MakeCity     [](chan int)
 	MakeWall     [](chan int)
 	MakeSchool   [](chan int)
@@ -135,7 +135,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 
 	switch args[0] {
 	case "attack":
-		if len(args) < 3 {
+		if len(args) < 4 {
 			return
 		}
 		fromTile, err1 := strconv.Atoi(args[1])
@@ -144,8 +144,13 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			log.Println("Error: ", err1, " or ", err2)
 		}
 
+		isHalf := 0
+		if args[3] == "1" {
+			isHalf = 1
+		}
+
 		select {
-		case thread.Attack[info.Index] <- [2]int{fromTile, toTile}:
+		case thread.Attack[info.Index] <- [3]int{fromTile, toTile, isHalf}:
 		case <-time.After(500 * time.Millisecond):
 		}
 	case "city", "wall", "school", "portal", "collect", "launcher":
@@ -180,7 +185,7 @@ func startGameThread(gameId string, game *Game) {
 	})
 	for _, _ = range game.Countries {
 		thread.Error = append(thread.Error, make(chan string))
-		thread.Attack = append(thread.Attack, make(chan [2]int))
+		thread.Attack = append(thread.Attack, make(chan [3]int))
 		thread.MakeCity = append(thread.MakeCity, make(chan int))
 		thread.MakeWall = append(thread.MakeWall, make(chan int))
 		thread.MakeSchool = append(thread.MakeSchool, make(chan int))
@@ -267,7 +272,7 @@ func startGameThread(gameId string, game *Game) {
 		for countryIndex, attack := range thread.Attack {
 			select {
 			case data := <-attack:
-				game.Attack(countryIndex, data[0], data[1])
+				game.Attack(countryIndex, data[0], data[1], data[2] != 0)
 			default:
 			}
 		}

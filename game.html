@@ -101,7 +101,14 @@ body {
 	background: url(/launcher.svg) hsl(var(--color), 75%, 65%);
 }
 #map[data-half] .tile:focus {
-	filter: brightness(50%);
+	position: relative;
+}
+#map[data-half] .tile:focus::after {
+	color: #fff;
+	content: "½";
+	position: absolute;
+	font-size: 10px;
+	right: 4px; bottom: 4px;
 }
 
 .country {

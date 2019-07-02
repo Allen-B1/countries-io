@@ -151,7 +151,7 @@ outer:
 }
 
 // Method Attack causes a country to move armies
-func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool {
+func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int, isHalf bool) bool {
 	if g.Terrain[fromTileIndex] != countryIndex ||
 		g.Armies[fromTileIndex] < 2 ||
 		toTileIndex >= len(g.Terrain) || toTileIndex < 0 {
@@ -187,8 +187,15 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int) bool
 		}
 	}
 
-	var targetArmy = g.Armies[fromTileIndex] - 1
-	var remainingArmy = uint(1)
+	var targetArmy uint
+	var remainingArmy uint
+	if !isHalf {
+		targetArmy = g.Armies[fromTileIndex] - 1
+		remainingArmy = uint(1)
+	} else {
+		targetArmy = g.Armies[fromTileIndex] / 2
+		remainingArmy = g.Armies[fromTileIndex] - targetArmy
+	}
 
 	if g.Terrain[toTileIndex] == countryIndex {
 		if g.Schools[toTileIndex] || g.Schools[fromTileIndex] {
