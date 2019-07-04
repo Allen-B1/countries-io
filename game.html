@@ -402,8 +402,8 @@ window.onkeydown = function(e) {
 			if (map.terrain[index] !== -2) {
 				ws.send("attack " + index + " " + endIndex + " " + isHalf());
 				canAttack = false;
-				document.getElementById("map").removeAttribute("data-half");
 			}
+			document.getElementById("map").removeAttribute("data-half");
 			var endtile = document.getElementById("tile-" + endIndex);
 			if (endtile != null) {
 				endtile.focus();

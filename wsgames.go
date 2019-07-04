@@ -151,7 +151,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 
 		select {
 		case thread.Attack[info.Index] <- [3]int{fromTile, toTile, isHalf}:
-		case <-time.After(500 * time.Millisecond):
+		case <-time.After(300 * time.Millisecond):
 		}
 	case "city", "wall", "school", "portal", "collect", "launcher":
 		if len(args) != 2 {
@@ -170,10 +170,7 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 			"launcher": thread.MakeLauncher[info.Index],
 		}[args[0]]
 
-		select {
-		case channel <- tile:
-		case <-time.After(300 * time.Millisecond):
-		}
+		channel <- tile
 	}
 }
 
@@ -186,12 +183,12 @@ func startGameThread(gameId string, game *Game) {
 	for _, _ = range game.Countries {
 		thread.Error = append(thread.Error, make(chan string))
 		thread.Attack = append(thread.Attack, make(chan [3]int))
-		thread.MakeCity = append(thread.MakeCity, make(chan int))
-		thread.MakeWall = append(thread.MakeWall, make(chan int))
-		thread.MakeSchool = append(thread.MakeSchool, make(chan int))
-		thread.MakePortal = append(thread.MakePortal, make(chan int))
-		thread.Collect = append(thread.Collect, make(chan int))
-		thread.MakeLauncher = append(thread.MakeLauncher, make(chan int))
+		thread.MakeCity = append(thread.MakeCity, make(chan int, 16))
+		thread.MakeWall = append(thread.MakeWall, make(chan int, 16))
+		thread.MakeSchool = append(thread.MakeSchool, make(chan int, 16))
+		thread.MakePortal = append(thread.MakePortal, make(chan int, 16))
+		thread.Collect = append(thread.Collect, make(chan int, 16))
+		thread.MakeLauncher = append(thread.MakeLauncher, make(chan int, 16))
 	}
 
 	gameThreads[gameId] = thread
@@ -278,50 +275,74 @@ func startGameThread(gameId string, game *Game) {
 		}
 
 		for countryIndex, channel := range thread.MakeWall {
-			select {
-			case data := <-channel:
-				game.MakeWall(countryIndex, data)
-			default:
+		loopwall:
+			for {
+				select {
+				case data := <-channel:
+					game.MakeWall(countryIndex, data)
+				default:
+					break loopwall
+				}
 			}
 		}
 
 		for countryIndex, channel := range thread.MakeCity {
-			select {
-			case data := <-channel:
-				game.MakeCity(countryIndex, data)
-			default:
+		loopcity:
+			for {
+				select {
+				case data := <-channel:
+					game.MakeCity(countryIndex, data)
+				default:
+					break loopcity
+				}
 			}
 		}
 
 		for countryIndex, channel := range thread.MakeSchool {
-			select {
-			case data := <-channel:
-				game.MakeSchool(countryIndex, data)
-			default:
+		loopschool:
+			for {
+				select {
+				case data := <-channel:
+					game.MakeSchool(countryIndex, data)
+				default:
+					break loopschool
+				}
 			}
 		}
 
 		for countryIndex, channel := range thread.MakePortal {
-			select {
-			case data := <-channel:
-				game.MakePortal(countryIndex, data)
-			default:
+		loopportal:
+			for {
+				select {
+				case data := <-channel:
+					game.MakePortal(countryIndex, data)
+				default:
+					break loopportal
+				}
 			}
 		}
 
 		for countryIndex, channel := range thread.Collect {
-			select {
-			case data := <-channel:
-				game.Collect(countryIndex, data)
-			default:
+		loopcollect:
+			for {
+				select {
+				case data := <-channel:
+					game.Collect(countryIndex, data)
+				default:
+					break loopcollect
+				}
 			}
 		}
 
 		for countryIndex, channel := range thread.MakeLauncher {
-			select {
-			case data := <-channel:
-				game.MakeLauncher(countryIndex, data)
-			default:
+		looplauncher:
+			for {
+				select {
+				case data := <-channel:
+					game.MakeLauncher(countryIndex, data)
+				default:
+					break looplauncher
+				}
 			}
 		}
 
