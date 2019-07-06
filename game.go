@@ -75,7 +75,20 @@ func NewGame(countries []string, width int, height int) *Game {
 		g.Terrain[index] = TILE_EMPTY
 	}
 
-	if len(g.Countries) != 2 {
+	var capitals []int
+	switch len(g.Countries) {
+	case 2:
+		capitals = []int{0, size-1}
+	case 3: // TODO
+		capitals = []int{0, size-1, g.Width-1}
+	case 4:
+		capitals = []int{0, size-1, g.Width-1, size-g.Width}
+	case 6:
+		capitals = []int{0, size-1, g.Width-1, size-g.Width, g.Width/2, size-g.Width/2}
+	// TODO: 5
+	}
+
+	if capitals == nil {
 		for countryIndex, _ := range g.Countries {
 		makecapital:
 			for {
@@ -98,13 +111,11 @@ func NewGame(countries []string, width int, height int) *Game {
 			}
 		}
 	} else {
-		g.Capitals[0] = true
-		g.Terrain[0] = 0
-		g.ConvertAround(0, 2, 0, TILE_EMPTY)
-
-		g.Capitals[size-1] = true
-		g.Terrain[size-1] = 1
-		g.ConvertAround(size-1, 2, 1, TILE_EMPTY)
+		for country, capital := range capitals {
+			g.Capitals[capital] = true
+			g.Terrain[capital] = country
+			g.ConvertAround(capital, 2, country, TILE_EMPTY)
+		}
 	}
 
 	return g
