@@ -78,14 +78,14 @@ func NewGame(countries []string, width int, height int) *Game {
 	var capitals []int
 	switch len(g.Countries) {
 	case 2:
-		capitals = []int{0, size-1}
+		capitals = []int{0, size - 1}
 	case 3: // TODO
-		capitals = []int{0, size-1, g.Width-1}
+		capitals = []int{0, size - 1, g.Width - 1}
 	case 4:
-		capitals = []int{0, size-1, g.Width-1, size-g.Width}
+		capitals = []int{0, size - 1, g.Width - 1, size - g.Width}
 	case 6:
-		capitals = []int{0, size-1, g.Width-1, size-g.Width, g.Width/2, size-g.Width/2}
-	// TODO: 5
+		capitals = []int{0, size - 1, g.Width - 1, size - g.Width, g.Width / 2, size - g.Width/2}
+		// TODO: 5
 	}
 
 	if capitals == nil {
