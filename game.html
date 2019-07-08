@@ -280,16 +280,25 @@ ws.onmessage = function(msg) {
 		for (var tile of map.launchers) {
 			var elem = document.getElementById("tile-" + tile);
 			elem.classList.add("launcher");
+
 		}
 
-		if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
-			for (var capital of map.capitals) {
-				if (map.terrain[capital] == countryIndex) {
+		var hasCapital = false;
+		for (var capital of map.capitals) {
+			if (map.terrain[capital] == countryIndex) {
+				hasCapital = true;
+				if (!capitalSelected && !(document.activeElement.id && document.activeElement.id.startsWith("tile-"))) {
 					document.getElementById("tile-" + capital).focus();
 					lastActive = capital;
 					capitalSelected = true;
 					break;
 				}
+			}
+		}
+
+		if (!hasCapital) {
+			for (var tiletype of ["city", "school", "portal", "launcher"]) {
+				document.getElementById(tiletype).style.display = "none";
 			}
 		}
 
@@ -302,8 +311,8 @@ ws.onmessage = function(msg) {
 			if (i === countryIndex) {
 				document.getElementById("wall").style.display = scientists >= 15 ? "block": "none";
 				document.getElementById("collect").style.display = scientists >= 200 ? "block": "none";
-				document.getElementById("launcher").style.display = scientists >= 500 ? "block": "none";
-				document.getElementById("portal").style.display = scientists >= 1000 ? "block": "none";
+				document.getElementById("launcher").style.display = (scientists >= 500 && hasCapital) ? "block": "none";
+				document.getElementById("portal").style.display = (scientists >= 1000 && hasCapital) ? "block": "none";
 			}
 		}
 		firstupdate = false;
@@ -368,8 +377,8 @@ ws.onopen = function() {
 	gameId = arr[0]; countryIndex = arr[1] | 0;
 	ws.send("join " + gameId + " " + countryIndex);
 
-	for (var tiletype of ["city", "school", "wall", "portal"]) {
-		if (countryIndex < 0) {
+	if (countryIndex < 0) {
+		for (var tiletype of ["city", "school"]) {
 			document.getElementById(tiletype).style.display = "none";
 		}
 	}
