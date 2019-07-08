@@ -222,12 +222,14 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int, isHa
 		remainingArmy = g.Armies[fromTileIndex] - targetArmy
 	}
 
-	if g.Terrain[toTileIndex] == countryIndex {
+	if g.IsSameTeam(g.Terrain[toTileIndex], countryIndex) {
 		if g.Schools[toTileIndex] || g.Schools[fromTileIndex] {
 			return false
 		}
 		g.Armies[toTileIndex] += targetArmy
-		g.Terrain[toTileIndex] = countryIndex
+		if !g.Capitals[toTileIndex] {
+			g.Terrain[toTileIndex] = countryIndex
+		}
 	} else {
 		toCountry := g.Terrain[toTileIndex]
 		if targetArmy > g.Armies[toTileIndex] { // win
@@ -725,4 +727,9 @@ func (g *Game) Ended() bool {
 	}
 
 	return false
+}
+
+func (g *Game) IsSameTeam(country1 int, country2 int) bool {
+	return country1 == country2 ||
+		(g.Is2v2 && country1/2 == country2/2)
 }
