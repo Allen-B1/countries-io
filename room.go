@@ -51,7 +51,7 @@ func (r *Room) Add(name string) bool {
 		return false
 	}
 	r.Countries[name] = true
-	if len(r.Countries) >= 2 && r.StartTime == nil {
+	if len(r.Countries) >= 2 && r.StartTime == nil && !r.Is2v2 {
 		r.StartTime = new(time.Time)
 		*r.StartTime = time.Now().Add(time.Duration(2 * time.Minute))
 		log.Println(*r.StartTime)
