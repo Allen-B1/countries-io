@@ -50,10 +50,12 @@ type Game struct {
 
 	// The current turn #
 	Turn int
+
+	Is2v2 bool
 }
 
 // Function NewGame creates and returns a new Game
-func NewGame(countries []string, width int, height int) *Game {
+func NewGame(countries []string, width int, height int, is2v2 bool) *Game {
 	size := width * height
 	g := &Game{
 		Countries: countries,
@@ -68,6 +70,7 @@ func NewGame(countries []string, width int, height int) *Game {
 		Turn:      0,
 		Width:     width,
 		Height:    height,
+		Is2v2:     is2v2,
 	}
 
 	// Reset to -1
@@ -82,7 +85,7 @@ func NewGame(countries []string, width int, height int) *Game {
 	case 3: // TODO
 		capitals = []int{0, size - 1, g.Width - 1}
 	case 4:
-		capitals = []int{0, size - 1, g.Width - 1, size - g.Width}
+		capitals = []int{0, g.Width - 1, size - 1, size - g.Width}
 	case 6:
 		capitals = []int{0, size - 1, g.Width - 1, size - g.Width, g.Width / 2, size - g.Width/2}
 		// TODO: 5
@@ -128,11 +131,12 @@ func (g *Game) NextTurn() {
 		hasCapital[g.Terrain[capital]] = true
 	}
 
+outer:
 	for index, terrain := range g.Terrain {
 		// Don't increase anything for not-in-game-anymore people
 		for loser, _ := range g.Losers {
 			if terrain == loser {
-				continue
+				continue outer
 			}
 		}
 
@@ -703,5 +707,22 @@ func (g *Game) HasCapital(countryIndex int) bool {
 			return true
 		}
 	}
+	return false
+}
+
+// Returns true if the game ended
+func (g *Game) Ended() bool {
+	if len(g.Countries)-len(g.Losers) <= 1 {
+		return true
+	}
+	if g.Is2v2 {
+		if g.Losers[0] && g.Losers[1] {
+			return true
+		}
+		if g.Losers[2] && g.Losers[3] {
+			return true
+		}
+	}
+
 	return false
 }

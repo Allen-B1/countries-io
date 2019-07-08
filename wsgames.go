@@ -251,8 +251,7 @@ func startGameThread(gameId string, game *Game) {
 			copy(oldarmies, game.Armies)
 		}
 
-		// if only one person left stop
-		if len(game.Countries)-len(game.Losers) <= 1 {
+		if game.Ended() {
 			delete(games, gameId)
 			delete(gameThreads, gameId)
 			// go through gameConnInfos

@@ -33,10 +33,15 @@ var rooms = make(map[string]*Room)
 func roomsGet(id string) *Room {
 	room, ok := rooms[id]
 	if !ok {
-		if id == "1v1" {
-			room = NewRoom(2)
-		} else {
-			room = NewRoom(6)
+		switch id {
+		case "1v1":
+			room = NewRoom(2, false)
+		case "2v2":
+			room = NewRoom(4, true)
+		case "ffa":
+			room = NewRoom(6, false)
+		default:
+			room = NewRoom(1, false)
 		}
 		rooms[id] = room
 		go roomThread(id, room)

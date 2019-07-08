@@ -122,6 +122,9 @@ func main() {
 	http.HandleFunc("/1v1", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "room.html")
 	})
+	http.HandleFunc("/2v2", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "room.html")
+	})
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "game.html")
 	})

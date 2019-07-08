@@ -24,17 +24,19 @@ import (
 
 // Type Room represents a room
 type Room struct {
-	Max int // Max # of people
+	Max   int // Max # of people
+	Is2v2 bool
 
 	Countries map[string]bool
 
 	StartTime *time.Time
 }
 
-func NewRoom(max int) *Room {
+func NewRoom(max int, is2v2 bool) *Room {
 	r := &Room{
 		Max:       max,
 		Countries: make(map[string]bool),
+		Is2v2:     is2v2,
 	}
 
 	return r
@@ -71,5 +73,5 @@ func (r *Room) Game() *Game {
 	for country, _ := range r.Countries {
 		countrylist = append(countrylist, country)
 	}
-	return NewGame(countrylist, (len(countrylist)+1)*10, (len(countrylist)+1)*10)
+	return NewGame(countrylist, (len(countrylist)+1)*10, (len(countrylist)+1)*10, r.Is2v2)
 }
