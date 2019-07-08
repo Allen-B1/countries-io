@@ -123,20 +123,30 @@ func NewGame(countries []string, width int, height int) *Game {
 
 // Method NextTurn
 func (g *Game) NextTurn() {
-outer:
+	var hasCapital = make([]bool, len(g.Countries))
+	for capital, _ := range g.Capitals {
+		hasCapital[g.Terrain[capital]] = true
+	}
+
 	for index, terrain := range g.Terrain {
 		// Don't increase anything for not-in-game-anymore people
 		for loser, _ := range g.Losers {
 			if terrain == loser {
-				continue outer
+				continue
 			}
 		}
 
+		if terrain < 0 {
+			continue
+		}
+		if !hasCapital[terrain] {
+			if g.Turn%50 == 0 && g.Turn != 0 {
+				g.Armies[index] += 1
+			}
+			continue
+		}
+
 		switch g.TileType(index) {
-		case TILE_WALL:
-			continue
-		case TILE_EMPTY:
-			continue
 		case TILE_RURAL:
 			if g.Turn%50 == 0 && g.Turn != 0 {
 				g.Armies[index] += 1
@@ -242,7 +252,9 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int, isHa
 				g.Armies[toTileIndex] -= targetArmy
 			}
 		} else if targetArmy == g.Armies[toTileIndex] { // tie
-			g.DeleteTile(toTileIndex)
+			if !g.Capitals[toTileIndex] {
+				g.DeleteTile(toTileIndex)
+			}
 		}
 
 		if toCountry >= 0 {
@@ -264,6 +276,9 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 		if g.Cities[tile] || g.Capitals[tile] {
 			return false // Can't make a city too close to a city/capital
 		}
+	}
+	if !g.HasCapital(countryIndex) {
+		return false
 	}
 
 	g.Armies[tileIndex] -= 30
@@ -299,6 +314,9 @@ func (g *Game) MakeSchool(countryIndex int, tileIndex int) bool {
 	if g.TileSpecial(tileIndex) {
 		return false
 	}
+	if !g.HasCapital(countryIndex) {
+		return false
+	}
 	if g.TileType(tileIndex) != TILE_SUBURB {
 		return false
 	}
@@ -327,6 +345,9 @@ func (g *Game) MakePortal(countryIndex int, tileIndex int) bool {
 		return false
 	}
 	if g.Terrain[tileIndex] != countryIndex {
+		return false
+	}
+	if !g.HasCapital(countryIndex) {
 		return false
 	}
 	if g.TileSpecial(tileIndex) {
@@ -422,6 +443,9 @@ func (g *Game) MakeLauncher(countryIndex int, tileIndex int) bool {
 		return false
 	}
 	if g.Terrain[tileIndex] != countryIndex {
+		return false
+	}
+	if !g.HasCapital(countryIndex) {
 		return false
 	}
 	if g.TileSpecial(tileIndex) {
@@ -671,4 +695,13 @@ func (g *Game) Scientists(countryIndex int) uint {
 		}
 	}
 	return out
+}
+
+func (g *Game) HasCapital(countryIndex int) bool {
+	for capital, _ := range g.Capitals {
+		if g.Terrain[capital] == countryIndex {
+			return true
+		}
+	}
+	return false
 }
