@@ -170,12 +170,7 @@ body {
 		<script>
 var map = {
 	terrain: [],
-	armies: [],
-	capitals: [],
-	cities: [],
-	schools: null,
-	portals: [],
-	launchers: []
+	armies: []
 };
 var countries = [];
 var width, height;
@@ -237,11 +232,11 @@ ws.onmessage = function(msg) {
 		canAttack = true;
 		var data = JSON.parse(msg.data.slice("update ".length));
 		document.getElementById("turn").innerHTML = data.turn;
-		map.cities = data.cities;
-		map.capitals = data.capitals;
+		map.cities = new Set(data.cities);
+		map.capitals = new Set(data.capitals);
 		map.schools = new Set(data.schools);
-		map.portals = data.portals;
-		map.launchers = data.launchers;
+		map.portals = new Set(data.portals);
+		map.launchers = new Set(data.launchers);
 		map.terrain = patch(map.terrain, data.terrain_diff);
 		map.armies = patch(map.armies, data.armies_diff);
 
@@ -260,27 +255,27 @@ ws.onmessage = function(msg) {
 					elem.classList.remove("school");
 				}
 			}
-		}
-		if (firstupdate) {
-			for (var tile of map.capitals) {
-				var elem = document.getElementById("tile-" + tile);
-				elem.classList.add("capital");
-			}
-		}
-		for (var tile of map.cities) {
-			var elem = document.getElementById("tile-" + tile);
-			elem.classList.add("city");
-			if (elem.classList.contains("capital"))
-				elem.classList.remove("capital");
-		}
-		for (var tile of map.portals) {
-			var elem = document.getElementById("tile-" + tile);
-			elem.classList.add("portal");
-		}
-		for (var tile of map.launchers) {
-			var elem = document.getElementById("tile-" + tile);
-			elem.classList.add("launcher");
 
+			if (map.capitals.has(i)) {
+				elem.classList.add("capital");
+			} else {
+				elem.classList.remove("capital");
+			}
+			if (map.cities.has(i)) {
+				elem.classList.add("city");
+			} else {
+				elem.classList.remove("city");
+			}
+			if (map.launchers.has(i)) {
+				elem.classList.add("launcher");
+			} else {
+				elem.classList.remove("launcher");
+			}
+			if (map.portals.has(i)) {
+				elem.classList.add("portal");
+			} else {
+				elem.classList.remove("portal");
+			}
 		}
 
 		var hasCapital = false;
@@ -297,7 +292,7 @@ ws.onmessage = function(msg) {
 		}
 
 		if (!hasCapital) {
-			for (var tiletype of ["city", "school", "portal", "launcher"]) {
+			for (var tiletype of ["city", "school", "portal", "launcher", "wall"]) {
 				document.getElementById(tiletype).style.display = "none";
 			}
 		}
