@@ -195,13 +195,11 @@ func (g *Game) Attack(countryIndex int, fromTileIndex int, toTileIndex int, isHa
 		if g.Portals[fromTileIndex] && g.Terrain[toTileIndex] == countryIndex && g.Portals[toTileIndex] {
 			// do nothing
 		} else if g.Launchers[fromTileIndex] {
-			if g.Armies[fromTileIndex] <= 100 {
-				return false
-			}
-			g.Armies[fromTileIndex] -= 100
-			for _, tile := range g.TilesAround(toTileIndex, 2) {
-				if g.Armies[tile] > 30 {
-					g.Armies[tile] -= 30
+			val := g.Armies[fromTileIndex] / 4
+			g.Armies[fromTileIndex] = 1
+			for _, tile := range g.TilesAround(toTileIndex, 1) {
+				if g.Armies[tile] > val {
+					g.Armies[tile] -= val
 				} else {
 					g.DeleteTile(tile)
 				}
