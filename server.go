@@ -19,7 +19,6 @@
 
 	This program will serve the game on localhost:$PORT. If $PORT is not set, the program will serve on port 8080.
 */
-
 package main
 
 import (
