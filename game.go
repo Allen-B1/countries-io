@@ -349,6 +349,17 @@ func (g *Game) MakeSchool(countryIndex int, tileIndex int) bool {
 		return false
 	}
 
+	targetCity := -1
+	for _, city := range g.TilesAround(tileIndex, 2) {
+		if g.Terrain[city] == countryIndex && (g.Cities[city] || g.Capitals[city]) {
+			targetCity = city
+		}
+	}
+	if targetCity == -1 {
+		return false
+	}
+
+	g.Armies[targetCity] += g.Armies[tileIndex] - 15
 	g.Armies[tileIndex] = 0
 	g.Schools[tileIndex] = true
 	return true
