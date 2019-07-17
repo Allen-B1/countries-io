@@ -106,10 +106,10 @@ body {
 	position: relative;
 }
 #map[data-half] .tile:focus::after {
-	color: #fff;
+	color: hsla(0, 0%, 30%, 0.8);
 	content: "½";
 	position: absolute;
-	font-size: 10px;
+	font-size: 12px;
 	right: 4px; bottom: 4px;
 }
 
@@ -433,6 +433,13 @@ window.onkeydown = function(e) {
 		}
 		if (e.key == "6") {
 			ws.send("portal " + index);
+		}
+		if (e.code == "Space") {
+			if (!isHalf()) {
+				document.getElementById("map").setAttribute("data-half", "");
+			} else {
+				document.getElementById("map").removeAttribute("data-half");
+			}
 		}
 	}
 }
