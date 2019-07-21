@@ -435,6 +435,7 @@ window.onkeydown = function(e) {
 			ws.send("portal " + index);
 		}
 		if (e.code == "Space") {
+			e.preventDefault();
 			if (!isHalf()) {
 				document.getElementById("map").setAttribute("data-half", "");
 			} else {
