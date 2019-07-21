@@ -72,5 +72,5 @@ func (r *Room) Game() *Game {
 	for country, _ := range r.Countries {
 		countrylist = append(countrylist, country)
 	}
-	return NewGame(countrylist, (len(countrylist)+3)*10, (len(countrylist)+3)*10, r.Is2v2)
+	return NewGame(countrylist, (len(countrylist)+1)*10, (len(countrylist)+1)*10, r.Is2v2)
 }

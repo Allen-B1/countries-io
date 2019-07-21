@@ -283,7 +283,7 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 		g.Cities[tileIndex] || g.Capitals[tileIndex] || g.Schools[tileIndex] || g.Portals[tileIndex] {
 		return false
 	}
-	for _, tile := range g.TilesAround(tileIndex, 9) {
+	for _, tile := range g.TilesAround(tileIndex, 4) {
 		if g.Cities[tile] || g.Capitals[tile] {
 			return false // Can't make a city too close to a city/capital
 		}
