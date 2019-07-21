@@ -81,7 +81,7 @@ func NewGame(countries []string, width int, height int, is2v2 bool) *Game {
 	switch len(g.Countries) {
 	case 2:
 		capitals = []int{0, size - 1}
-	case 3: // TODO
+	case 3: // TODO: this isn't even
 		capitals = []int{0, size - 1, g.Width - 1}
 	case 4:
 		capitals = []int{0, g.Width - 1, size - 1, size - g.Width}
@@ -299,7 +299,7 @@ func (g *Game) MakeCity(countryIndex int, tileIndex int) bool {
 }
 
 func (g *Game) MakeWall(countryIndex int, tileIndex int) bool {
-	if g.Scientists(countryIndex) < 15 {
+	if g.Scientists(countryIndex) < 200 {
 		return false
 	}
 	if g.Terrain[tileIndex] != countryIndex {
@@ -391,7 +391,7 @@ func (g *Game) MakePortal(countryIndex int, tileIndex int) bool {
 
 // Collects army in 5x5
 func (g *Game) Collect(countryIndex int, tileIndex int) bool {
-	if g.Scientists(countryIndex) < 200 {
+	if g.Scientists(countryIndex) < 50 {
 		return false
 	}
 	if g.Terrain[tileIndex] != countryIndex {

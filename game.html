@@ -304,8 +304,8 @@ ws.onmessage = function(msg) {
 			document.getElementById("scientists-" + i).innerHTML = scientists;
 
 			if (i === countryIndex) {
-				document.getElementById("wall").style.display = (scientists >= 15 && hasCapital) ? "block": "none";
-				document.getElementById("collect").style.display = scientists >= 200 ? "block": "none";
+				document.getElementById("wall").style.display = (scientists >= 200 && hasCapital) ? "block": "none";
+				document.getElementById("collect").style.display = scientists >= 50 ? "block": "none";
 				document.getElementById("launcher").style.display = (scientists >= 500 && hasCapital) ? "block": "none";
 				document.getElementById("portal").style.display = (scientists >= 1000 && hasCapital) ? "block": "none";
 			}
