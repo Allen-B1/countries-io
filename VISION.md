@@ -6,3 +6,6 @@ a game focused on
 
 this game is not intended to be simple
 
+a game should not be decided early on... chances for the underdog to take over should exist
+
+*these statements are in order of importance*
