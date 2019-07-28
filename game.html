@@ -168,6 +168,17 @@ body {
 		</div>
 		<table id="countries"></table>
 		<table id="map"></table>
+
+		<div id="surrender" class="dialog">
+			<form onsubmit="this.parentNode.style.display = 'none'; event.preventDefault()">
+				<p>Surrender?</p>
+				<div class="buttons">
+					<button type="submit" class="orange" onclick="ws.send('surrender')">Surrender</button>
+					<button type="submit">Cancel</button>
+				</div>
+			</form>
+		</div>
+
 		<script>
 var map = {
 	terrain: [],
@@ -381,6 +392,15 @@ ws.onopen = function() {
 }
 
 window.onkeydown = function(e) {
+	if (e.code == "Escape") {
+		e.preventDefault();
+		var surrender = document.getElementById("surrender");
+		if (surrender.style.display == "none") {
+			surrender.style.display = "block";
+		} else {
+			surrender.style.display = "none";
+		}
+	}
 	if (document.activeElement.id && document.activeElement.id.startsWith("tile-")){
 		var index = document.activeElement.id.slice(5) | 0;
 		if (e.code == "KeyW" || e.code == "KeyA" || e.code == "KeyS" || e.code == "KeyD") {

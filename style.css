@@ -35,6 +35,15 @@ button, .button {
 button:active, .button:active, button:focus, .button:focus {
 	border: 4px solid hsl(100, 75%, 55%);
 }
+
+.orange {
+	background: hsl(30, 75%, 65%);
+	border-color: hsl(30, 75%, 65%);
+}
+.orange:active, .orange:focus {
+	border-color: hsl(30, 75%, 55%);
+}
+
 big {
 	font-weight: bold;
 	font-size: 14px;
@@ -66,3 +75,32 @@ input:focus {
 	color: hsl(200, 75%, 65%);
 }
 
+.dialog {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0; left: 0;
+	background: rgba(0,0,0,0.3);
+	display: none;
+}
+
+.dialog form {
+	background: #fff;
+	position: static;
+	width: 300px;
+	margin: auto;
+	margin-top: 40vh;
+	padding: 16px;
+}
+
+.buttons {
+	display: flex;
+	flex-direction: row;
+}
+.buttons .button, .buttons button {
+	flex-grow: 1;
+	margin-right: 16px;
+}
+.buttons :last-child {
+	margin-right: 0;
+}
