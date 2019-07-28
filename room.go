@@ -17,7 +17,6 @@
 package main
 
 import (
-	"log"
 	"time"
 )
 
@@ -53,7 +52,6 @@ func (r *Room) Add(name string) bool {
 	if len(r.Countries) >= 2 && r.StartTime == nil && !r.Is2v2 {
 		r.StartTime = new(time.Time)
 		*r.StartTime = time.Now().Add(time.Duration(2 * time.Minute))
-		log.Println(*r.StartTime)
 	}
 	return true
 }

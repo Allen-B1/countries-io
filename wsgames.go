@@ -202,8 +202,6 @@ func startGameThread(gameId string, game *Game) {
 		index := data.int
 		conn := data.Conn
 
-		log.Printf("%d joined\n", index)
-
 		if index < 0 {
 			continue
 		}
@@ -225,7 +223,7 @@ func startGameThread(gameId string, game *Game) {
 
 	broadcastGame(gameId, "player_list "+strings.Join(game.Countries, " "))
 	broadcastGame(gameId, fmt.Sprintf("map %d %d", game.Width, game.Height))
-	log.Println("Broadcasted " + gameId)
+	log.Println("started " + gameId)
 
 	ticker := time.NewTicker(250 * time.Millisecond)
 	defer ticker.Stop()

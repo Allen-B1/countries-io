@@ -19,7 +19,6 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
-	"log"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -86,7 +85,7 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 			delete(roomConns.Map, conn)
 			broadcastRoom(roomId, "player_remove")
 
-			log.Println("leave " + roomId + " " + country)
+			//			log.Println("leave " + roomId + " " + country)
 			if room.StartTime == nil {
 				broadcastRoom(roomId, "time_reset")
 			}
@@ -128,7 +127,7 @@ func handleRoomCommand(conn *websocket.Conn, mt int, args []string) {
 			startGame(roomId, room)
 		}
 
-		log.Println("join " + args[1] + " " + args[2])
+		//		log.Println("join " + args[1] + " " + args[2])
 		return
 	}
 }
@@ -137,7 +136,6 @@ func roomThread(roomId string, room *Room) {
 	for {
 		time.Sleep(1 * time.Second)
 		if room.StartTime != nil && time.Now().After(*room.StartTime) {
-			log.Println("Starting...")
 			startGame(roomId, room)
 		}
 	}
