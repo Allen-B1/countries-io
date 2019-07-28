@@ -52,14 +52,15 @@ func broadcastGame(gameId string, message string) {
 }
 
 type gameThread struct {
-	Join chan struct {
-		int
-		*websocket.Conn
-	} // Incoming
 	// Outgoing
 	Error []chan string
 
 	// Incoming
+	Join chan struct {
+		int
+		*websocket.Conn
+	}
+
 	Attack       [](chan [3]int)
 	MakeCity     [](chan int)
 	MakeWall     [](chan int)
@@ -170,6 +171,8 @@ func handleGameCommand(conn *websocket.Conn, mt int, args []string) {
 		}[args[0]]
 
 		channel <- tile
+	case "surrender":
+		game.Leave(info.Index)
 	}
 }
 
